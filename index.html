@@ -4,10 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecureChat // V4 (Pro UI)</title>
+    <title>SecureChat // V4.2 (Perfect UI)</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #0f0f13; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        body { background-color: #0f0f13; color: white; display: flex; justify-content: center; align-items: center; height: 100dvh; overflow: hidden; }
         
         #login-screen { background: #1c1c24; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 90%; max-width: 400px; text-align: center; z-index: 10; }
         h2 { margin-bottom: 20px; color: #00ffcc; }
@@ -15,7 +15,7 @@
         .btn { width: 100%; padding: 12px; background: #00ffcc; color: black; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
         .btn:hover { background: #00e6b8; transform: scale(1.02); }
 
-        #chat-screen { display: none; width: 100%; max-width: 500px; height: 100vh; background: #1c1c24; flex-direction: column; position: relative; }
+        #chat-screen { display: none; width: 100%; max-width: 500px; height: 100%; background: #1c1c24; flex-direction: column; position: relative; }
         #chat-header { background: #2a2a35; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00ffcc; }
         .call-btn { background: #00ffcc; color: black; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; }
         
@@ -25,25 +25,24 @@
         .msg.received { background: #2a2a35; color: white; align-self: flex-start; border-bottom-left-radius: 2px; }
         .sender-name { font-size: 0.65rem; opacity: 0.7; margin-bottom: 3px; display: block; font-weight: bold; }
 
-        #input-area { display: flex; padding: 10px; background: #2a2a35; }
+        #input-area { display: flex; padding: 10px; background: #2a2a35; width: 100%; z-index: 5; }
         #msg-input { flex-grow: 1; border-radius: 20px; padding: 10px 15px; margin-right: 10px; border: none; background: #1c1c24; color: white; outline:none; }
-        #send-btn { background: #00ffcc; color: black; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.2rem; cursor: pointer; }
+        #send-btn { background: #00ffcc; color: black; border: none; border-radius: 50%; width: 40px; height: 40px; min-width: 40px; font-size: 1.2rem; cursor: pointer; display: flex; justify-content: center; align-items: center; }
 
         /* PRO VIDEO CALL UI */
         #video-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 100; flex-direction: column; }
         #remoteVideo { width: 100%; height: 100%; object-fit: cover; background: #111; }
         
-        /* CHOTI SCREEN AB NICHE RIGHT MEIN (WhatsApp Style) */
-        #localVideo { width: 100px; height: 150px; position: absolute; bottom: 100px; right: 20px; object-fit: cover; border: 2px solid #00ffcc; border-radius: 10px; background: #333; z-index: 101; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        /* CHOTI SCREEN KO AUR UPAR KIYA (bottom: 150px) */
+        #localVideo { width: 100px; height: 150px; position: absolute; bottom: 150px; right: 20px; object-fit: cover; border: 2px solid #00ffcc; border-radius: 10px; background: #333; z-index: 101; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         
-        /* END CALL BUTTON - BOTTOM CENTER */
-        #call-controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: center; z-index: 102; }
+        /* END CALL BUTTON KO BHI UPAR KIYA (bottom: 80px) */
+        #call-controls { position: absolute; bottom: 80px; width: 100%; display: flex; justify-content: center; z-index: 102; }
         .end-btn { padding: 15px 40px; border-radius: 30px; font-weight: bold; cursor: pointer; border: none; font-size: 1.1rem; background: #ff003c; color: white; box-shadow: 0 4px 15px rgba(255,0,60,0.5); transition: 0.2s; }
         .end-btn:hover { background: #d40032; transform: scale(1.05); }
 
-        /* FLIP CAMERA BUTTON - TOP RIGHT */
         .flip-btn { position: absolute; top: 20px; right: 20px; z-index: 105; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); color: white; border: 2px solid white; border-radius: 50%; width: 50px; height: 50px; font-size: 1.2rem; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: 0.2s; }
-        .flip-btn:active { transform: rotate(180deg); } /* Ghumne wala animation */
+        .flip-btn:active { transform: rotate(180deg); }
         
         #incoming-alert { display: none; background: #ff003c; color: white; padding: 15px; text-align: center; font-weight: bold; cursor: pointer; animation: blink 1s infinite; z-index: 110; position: absolute; width: 100%; top: 0; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
@@ -52,7 +51,7 @@
 <body>
 
     <div id="login-screen">
-        <h2>SecureChat V4 📹</h2>
+        <h2>SecureChat V4.2 💬</h2>
         <input type="text" id="username" placeholder="Enter Your Name">
         <button class="btn" onclick="startChat()">Enter Secure Node</button>
     </div>
@@ -67,16 +66,14 @@
         <div id="messages"></div>
 
         <div id="input-area">
-            <input type="text" id="msg-input" placeholder="Message...">
+            <input type="text" id="msg-input" placeholder="Type a message...">
             <button id="send-btn" onclick="sendRealMsg()">➤</button>
         </div>
 
         <div id="video-overlay">
             <video id="remoteVideo" autoplay playsinline></video>
             <video id="localVideo" autoplay playsinline muted></video>
-            
             <button class="flip-btn" onclick="flipCamera()">🔄</button>
-
             <div id="call-controls">
                 <button class="end-btn" onclick="endCall()">❌ End Call</button>
             </div>
@@ -87,7 +84,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getDatabase, ref, push, onChildAdded, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-        // TUMHARI EXACT FIREBASE DETAILS
         const firebaseConfig = {
             apiKey: "AIzaSyCbJmwbTt7Ds1GVAbQnn0yJPl2STl1B5WM",
             authDomain: "chat-18904.firebaseapp.com",
