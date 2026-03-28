@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecureChat // V13 (Group Squads)</title>
+    <title>SecureChat // V14 (Pro Cropper)</title>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
         :root { --primary: #00ffcc; --msg-sent: #004d40; --msg-received: #2d3436; --ticks: #95a5a6; --read-ticks: #3498db; --group-color: #ff4757; }
@@ -72,9 +76,27 @@
         .flip-btn { position: absolute; top: 20px; right: 20px; z-index: 105; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); color: white; border: 2px solid white; border-radius: 50%; width: 50px; height: 50px; font-size: 1.2rem; display: flex; justify-content: center; align-items: center; cursor: pointer; }
         #incoming-alert { display: none; background: #ff003c; color: white; padding: 15px; text-align: center; font-weight: bold; cursor: pointer; animation: blink 1s infinite; z-index: 110; position: absolute; width: 100%; top: 0; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* 🌟 NEW CROP MODAL STYLING 🌟 */
+        #crop-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; flex-direction: column; justify-content: center; align-items: center; }
+        .crop-container { width: 90%; max-width: 400px; height: 350px; background: #111; border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
+        .crop-container img { display: block; max-width: 100%; }
+        .crop-buttons { display: flex; gap: 15px; width: 90%; max-width: 400px; }
+        .crop-btn { flex: 1; padding: 12px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; font-size: 1rem; }
     </style>
 </head>
 <body>
+
+    <div id="crop-modal">
+        <h3 style="color:white; margin-bottom:15px;">Adjust DP</h3>
+        <div class="crop-container">
+            <img id="image-to-crop" src="">
+        </div>
+        <div class="crop-buttons">
+            <button class="crop-btn" style="background: #ff4757; color: white;" onclick="cancelCrop()">Cancel</button>
+            <button class="crop-btn" style="background: var(--primary); color: black;" onclick="applyCrop()">Crop & Save</button>
+        </div>
+    </div>
 
     <div id="login-screen" class="screen active-screen">
         <div class="login-box fade-in">
@@ -176,9 +198,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         
-        let currentUser = ""; let targetUser = ""; let chatType = "private"; // 'private' or 'group'
+        let currentUser = ""; let targetUser = ""; let chatType = "private"; 
         let privateRoomId = ""; let messagesRef, callRef, typingRef, myStatusRef;
-        let typingTimer; let pendingDpBase64 = null;
+        let typingTimer; let pendingDpBase64 = null; let cropper; // NEW CROPPER VAR
         
         let localStream; let peerConnection;
         const servers = { iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] };
@@ -229,25 +251,49 @@
             });
         }
         window.closeProfile = function() { document.getElementById('profile-screen').style.display = 'none'; }
+        
+        // 🌟 NEW CROPPER LOGIC 🌟
         window.handleDpUpload = function(event) {
-            const file = event.target.files[0]; if(!file) return;
+            const file = event.target.files[0]; 
+            if(!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas'); const MAX_SIZE = 150; 
-                    let width = img.width; let height = img.height;
-                    if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
-                    else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
-                    canvas.width = width; canvas.height = height;
-                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                    pendingDpBase64 = canvas.toDataURL('image/jpeg', 0.6);
-                    document.getElementById('my-dp-preview').innerHTML = `<img src="${pendingDpBase64}" style="width:100%; height:100%; object-fit:cover;">`;
-                }
-                img.src = e.target.result;
+                const imageElement = document.getElementById('image-to-crop');
+                imageElement.src = e.target.result;
+                document.getElementById('crop-modal').style.display = 'flex';
+                
+                if (cropper) { cropper.destroy(); }
+                
+                // Initialize Cropper JS
+                cropper = new Cropper(imageElement, {
+                    aspectRatio: 1, // 1:1 Square/Circle ratio
+                    viewMode: 1,
+                    autoCropArea: 1,
+                    background: false
+                });
             }
             reader.readAsDataURL(file);
+            event.target.value = ''; // Reset file input
         }
+
+        window.cancelCrop = function() {
+            document.getElementById('crop-modal').style.display = 'none';
+            if(cropper) { cropper.destroy(); cropper = null; }
+        }
+
+        window.applyCrop = function() {
+            if(!cropper) return;
+            // Get cropped image canvas
+            const canvas = cropper.getCroppedCanvas({
+                width: 150,
+                height: 150
+            });
+            
+            pendingDpBase64 = canvas.toDataURL('image/jpeg', 0.8);
+            document.getElementById('my-dp-preview').innerHTML = `<img src="${pendingDpBase64}" style="width:100%; height:100%; object-fit:cover;">`;
+            cancelCrop();
+        }
+
         window.saveProfile = function() {
             let newBio = document.getElementById('my-bio').value.trim();
             let updates = {};
@@ -280,7 +326,6 @@
             const listDiv = document.getElementById('contacts-list');
             listDiv.innerHTML = "";
             
-            // Load Groups
             onValue(ref(db, `users/${currentUser}/my_groups`), (snapshot) => {
                 if(snapshot.exists()) {
                     snapshot.forEach((childSnap) => {
@@ -299,7 +344,6 @@
                 }
             });
 
-            // Load Friends
             onValue(ref(db, `users/${currentUser}/my_friends`), (snapshot) => {
                 if(snapshot.exists()) {
                     snapshot.forEach((childSnapshot) => {
@@ -353,7 +397,6 @@
                     else { get(child(ref(db), `users/${targetUser}/status`)).then(s => { document.getElementById('chat-status').innerText = s.val() || "Offline"; }); }
                 });
                 
-                // Read logic for private chat
                 get(messagesRef).then((snapshot) => {
                     snapshot.forEach((msgSnap) => { if (msgSnap.val().sender !== currentUser) update(child(messagesRef, msgSnap.key), { read: true }); });
                 });
@@ -361,7 +404,6 @@
                 listenForCalls();
 
             } else {
-                // GROUP LOGIC
                 messagesRef = ref(db, "groups/" + targetUser + "/messages");
                 document.getElementById('chat-avatar').innerHTML = "👥";
                 document.getElementById('chat-status').innerText = "Group Squad";
@@ -371,7 +413,6 @@
             document.getElementById('chat-screen').classList.add('active-screen', 'fade-in');
             document.getElementById('chat-target-name').innerText = targetUser;
 
-            // Render Messages
             onChildAdded(messagesRef, (snapshot) => {
                 const data = snapshot.val();
                 const msgKey = snapshot.key;
@@ -383,7 +424,6 @@
                 let tickElement = (chatType === 'private' && msgType === "sent") ? (data.read ? `<span class="tick tick-blue">✓✓</span>` : `<span class="tick tick-grey">✓</span>`) : '';
                 
                 let contentHTML = "";
-                // If Group & Received, show sender name
                 if(chatType === 'group' && msgType === 'received') {
                     contentHTML += `<span class="sender-name">${data.sender}</span>`;
                 }
