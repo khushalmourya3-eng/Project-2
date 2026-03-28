@@ -3,73 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecureChat // V12 (Profile & Bio)</title>
+    <title>SecureChat // V13 (Group Squads)</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-        :root { --primary: #00ffcc; --msg-sent: #004d40; --msg-received: #2d3436; --ticks: #95a5a6; --read-ticks: #3498db; }
+        :root { --primary: #00ffcc; --msg-sent: #004d40; --msg-received: #2d3436; --ticks: #95a5a6; --read-ticks: #3498db; --group-color: #ff4757; }
         
         body { background: linear-gradient(rgba(18,18,26,0.4), rgba(18,18,26,0.6)), url('https://images.unsplash.com/photo-1522204523234-8729aa6e3d5f?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat fixed; color: white; height: 100dvh; overflow: hidden; }
         .fade-in { animation: fadeIn 0.4s ease-in-out; }
         .fade-out { animation: fadeOut 0.4s ease-in-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; display: none !important; } }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
 
         .screen { display: none; width: 100%; max-width: 450px; height: 100%; flex-direction: column; position: relative; margin: 0 auto; }
         .active-screen { display: flex; }
 
-        /* INPUTS & BUTTONS */
         input[type="text"], input[type="password"] { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: 1px solid #333; background: rgba(0,0,0,0.6); color: white; outline: none; font-size: 1rem; }
         input:focus { border-color: var(--primary); }
         .btn { width: 100%; padding: 15px; background: var(--primary); color: black; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 1.1rem; transition: 0.3s; }
         .btn:hover { background: #00e6b8; transform: translateY(-2px); }
 
-        /* LOGIN */
         #login-screen { justify-content: center; align-items: center; padding: 40px; }
         .login-box { background: rgba(20, 20, 25, 0.85); backdrop-filter: blur(10px); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); width: 90%; text-align: center; border: 1px solid rgba(0,255,204,0.3); }
         h2.brand { margin-bottom: 25px; color: var(--primary); font-size: 2rem; font-weight: 700; letter-spacing: -1px;}
 
-        /* HEADER */
         .header { background: rgba(20, 20, 25, 0.95); padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 10; display: flex; justify-content: space-between; align-items: center;}
         
-        /* CONTACTS */
         #contacts-screen { background: rgba(30, 30, 46, 0.75); backdrop-filter: blur(15px); }
-        .search-area { padding: 15px; background: rgba(0,0,0,0.4); border-bottom: 1px solid rgba(255,255,255,0.05); display: flex;}
+        .search-area { padding: 15px; background: rgba(0,0,0,0.4); display: flex;}
         .search-input { width: 70%; padding: 10px; border-radius: 8px; border: none; background: rgba(255,255,255,0.1); color: white; outline: none; }
         .add-btn { width: 25%; padding: 10px; background: var(--primary); border-radius: 8px; border: none; font-weight: bold; margin-left: 5%; cursor: pointer; color: black;}
+        
         #contacts-list { flex-grow: 1; overflow-y: auto; padding: 10px; }
         .contact-card { display: flex; align-items: center; padding: 15px; background: rgba(0,0,0,0.5); margin-bottom: 10px; border-radius: 12px; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
         .contact-card:hover { background: rgba(0,255,204,0.1); border-color: rgba(0,255,204,0.2); }
         .contact-avatar { width: 45px; height: 45px; background: var(--primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: black; font-weight: bold; margin-right: 15px; overflow: hidden; }
+        .group-avatar { background: var(--group-color); color: white; }
 
-        /* PROFILE OVERLAY */
         #profile-screen { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(20, 20, 25, 0.98); z-index: 50; display: none; flex-direction: column; }
         .profile-container { padding: 30px; text-align: center; }
         .dp-large { width: 120px; height: 120px; background: var(--primary); border-radius: 50%; margin: 0 auto 20px; display: flex; justify-content: center; align-items: center; font-size: 3rem; color: black; font-weight: bold; cursor: pointer; overflow: hidden; border: 3px solid var(--primary); }
 
-        /* CHAT SCREEN */
         #chat-screen { background: rgba(18, 18, 26, 0.85); backdrop-filter: blur(15px); }
         #messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; scroll-behavior: smooth; }
         .msg { padding: 12px 18px; border-radius: 18px; max-width: 80%; word-wrap: break-word; position: relative; font-size: 0.95rem; line-height: 1.4; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: 0.3s; cursor: pointer; }
         .msg.sent { background: var(--msg-sent); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
         .msg.received { background: var(--msg-received); color: white; align-self: flex-start; border-bottom-left-radius: 4px; }
         .msg:active { transform: scale(0.95); opacity: 0.8; }
+        
+        .sender-name { font-size: 0.7rem; color: var(--primary); font-weight: bold; margin-bottom: 4px; display: block; text-transform: capitalize; }
         .chat-img { max-width: 100%; border-radius: 10px; margin-bottom: 5px; border: 1px solid rgba(255,255,255,0.1); }
         .tick { position: absolute; bottom: 5px; right: 10px; font-size: 0.8rem;}
         .tick-grey { color: var(--ticks); } .tick-blue { color: var(--read-ticks); } 
 
-        /* CHAT INPUT */
         #input-area { display: flex; align-items: center; padding: 12px; background: rgba(20, 20, 25, 0.95); border-top: 1px solid rgba(255,255,255,0.05); }
         #attach-btn { background: none; color: #aaa; border: none; font-size: 1.5rem; cursor: pointer; margin-right: 10px; transition: 0.2s; }
         #attach-btn:hover { color: var(--primary); }
         #msg-input { flex-grow: 1; border-radius: 20px; padding: 12px 15px; margin-right: 10px; border: none; background: rgba(255,255,255,0.1); color: white; outline:none; }
         #send-btn { background: var(--primary); color: black; border: none; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.1rem; }
 
-        /* UTILS */
         .toast { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px; font-size: 0.85rem; z-index: 200; display: none; }
         
-        /* VIDEO CALL */
         #video-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 100; flex-direction: column; }
         #remoteVideo { width: 100%; height: 100%; object-fit: cover; background: #111; }
         #localVideo { width: 100px; height: 150px; position: absolute; bottom: 150px; right: 20px; object-fit: cover; border: 2px solid var(--primary); border-radius: 10px; background: #333; z-index: 101; }
@@ -100,10 +94,16 @@
                 <button class="btn" style="width: auto; padding: 5px 10px; margin: 0 0 0 5px; font-size: 0.8rem;" onclick="location.reload()">Logout</button>
             </div>
         </div>
-        <div class="search-area">
-            <input type="text" id="search-friend" class="search-input" placeholder="Search Friend ID...">
+        
+        <div class="search-area" style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <input type="text" id="search-friend" class="search-input" placeholder="Add Friend ID...">
             <button class="add-btn" onclick="addFriend()">Add</button>
         </div>
+        <div class="search-area">
+            <input type="text" id="search-group" class="search-input" placeholder="Join/Create Group Name...">
+            <button class="add-btn" style="background:var(--group-color); color:white;" onclick="joinGroup()">Join</button>
+        </div>
+
         <div id="contacts-list"></div>
     </div>
 
@@ -119,7 +119,7 @@
             
             <h3 id="profile-username" style="margin-bottom: 20px; color:var(--primary); text-transform:capitalize;">User</h3>
             <label style="color:#aaa; font-size:0.8rem; display:block; text-align:left; margin-bottom:5px;">About / Bio:</label>
-            <input type="text" id="my-bio" placeholder="Busy studying NEET...">
+            <input type="text" id="my-bio" placeholder="Busy studying...">
             <button class="btn" onclick="saveProfile()">Save Profile</button>
         </div>
     </div>
@@ -136,7 +136,7 @@
                     <span id="chat-status" style="font-size: 0.75rem; color: var(--primary); font-weight: bold;">Offline</span>
                 </div>
             </div>
-            <button class="btn" style="width: auto; padding: 8px 15px; margin: 0;" onclick="startCall()">📹 VC Option</button>
+            <button class="btn" style="width: auto; padding: 8px 15px; margin: 0;" onclick="startCallClick()">📹 VC</button>
         </div>
         
         <div id="messages"></div>
@@ -176,14 +176,14 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         
-        let currentUser = ""; let targetUser = ""; let privateRoomId = "";
-        let messagesRef, callRef, typingRef, myStatusRef;
-        let typingTimer; let pendingDpBase64 = null; // Profile DP Temp storage
+        let currentUser = ""; let targetUser = ""; let chatType = "private"; // 'private' or 'group'
+        let privateRoomId = ""; let messagesRef, callRef, typingRef, myStatusRef;
+        let typingTimer; let pendingDpBase64 = null;
         
         let localStream; let peerConnection;
         const servers = { iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] };
 
-        // 1. AUTH
+        // 1. AUTH & PROFILE
         window.authenticate = async function() {
             let user = document.getElementById('username').value.trim().toLowerCase();
             let pass = document.getElementById('password').value.trim();
@@ -191,9 +191,8 @@
 
             const dbRef = ref(db);
             get(child(dbRef, `users/${user}`)).then((snapshot) => {
-                if (snapshot.exists() && snapshot.val().password === pass) {
-                    login(user);
-                } else if (!snapshot.exists()) {
+                if (snapshot.exists() && snapshot.val().password === pass) { login(user); } 
+                else if (!snapshot.exists()) {
                     set(ref(db, 'users/' + user), { password: pass, bio: "Hey there! I am using SecureChat." });
                     login(user);
                 } else {
@@ -214,49 +213,34 @@
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('contacts-screen').classList.add('active-screen', 'fade-in');
                 document.getElementById('welcome-user').innerText = "Hi, " + currentUser;
-                loadMyFriendsDashboard();
+                loadDashboard();
             }, 500);
         }
 
-        /* --- NEW: PROFILE LOGIC (V12) --- */
         window.openProfile = function() {
             document.getElementById('profile-screen').style.display = 'flex';
             document.getElementById('profile-username').innerText = currentUser;
-            
-            // Load existing bio and DP
             get(child(ref(db), `users/${currentUser}`)).then((snap) => {
-                let data = snap.val();
+                let data = snap.val() || {};
                 if(data.bio) document.getElementById('my-bio').value = data.bio;
                 let dpBox = document.getElementById('my-dp-preview');
-                if(data.dpUrl) {
-                    dpBox.innerHTML = `<img src="${data.dpUrl}" style="width:100%; height:100%; object-fit:cover;">`;
-                    pendingDpBase64 = data.dpUrl;
-                } else {
-                    dpBox.innerHTML = currentUser.charAt(0).toUpperCase();
-                }
+                if(data.dpUrl) { dpBox.innerHTML = `<img src="${data.dpUrl}" style="width:100%; height:100%; object-fit:cover;">`; pendingDpBase64 = data.dpUrl; } 
+                else { dpBox.innerHTML = currentUser.charAt(0).toUpperCase(); }
             });
         }
-
         window.closeProfile = function() { document.getElementById('profile-screen').style.display = 'none'; }
-
         window.handleDpUpload = function(event) {
-            const file = event.target.files[0];
-            if(!file) return;
+            const file = event.target.files[0]; if(!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = new Image();
                 img.onload = function() {
-                    // Extreme compress for DP (150x150 max) to save DB space
-                    const canvas = document.createElement('canvas');
-                    const MAX_SIZE = 150; 
+                    const canvas = document.createElement('canvas'); const MAX_SIZE = 150; 
                     let width = img.width; let height = img.height;
                     if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
                     else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
-                    
                     canvas.width = width; canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    
+                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
                     pendingDpBase64 = canvas.toDataURL('image/jpeg', 0.6);
                     document.getElementById('my-dp-preview').innerHTML = `<img src="${pendingDpBase64}" style="width:100%; height:100%; object-fit:cover;">`;
                 }
@@ -264,20 +248,15 @@
             }
             reader.readAsDataURL(file);
         }
-
         window.saveProfile = function() {
             let newBio = document.getElementById('my-bio').value.trim();
             let updates = {};
             if(newBio) updates['/bio'] = newBio;
             if(pendingDpBase64) updates['/dpUrl'] = pendingDpBase64;
-            
-            update(ref(db, `users/${currentUser}`), updates).then(() => {
-                showToast("Profile Updated!");
-                closeProfile();
-            });
+            update(ref(db, `users/${currentUser}`), updates).then(() => { showToast("Profile Updated!"); closeProfile(); });
         }
 
-        // 2. CONTACTS (UPDATED FOR DP & BIO)
+        // 2. DASHBOARD (FRIENDS + GROUPS)
         window.addFriend = async function() {
             let friendId = document.getElementById('search-friend').value.trim().toLowerCase();
             if(friendId === currentUser) return alert("Cannot add yourself.");
@@ -289,86 +268,127 @@
             });
         }
 
-        function loadMyFriendsDashboard() {
-            onValue(ref(db, `users/${currentUser}/my_friends`), (snapshot) => {
-                const listDiv = document.getElementById('contacts-list');
-                listDiv.innerHTML = "";
-                if(!snapshot.exists()) { listDiv.innerHTML = "<p style='text-align:center; color:#ccc; margin-top:30px;'>No friends yet. Add an ID!</p>"; return; }
-                
-                snapshot.forEach((childSnapshot) => {
-                    let friendName = childSnapshot.key;
-                    // Listen to full friend object to get Status, Bio, and DP live
-                    onValue(ref(db, `users/${friendName}`), (friendSnap) => {
-                        let fData = friendSnap.val() || {};
-                        let status = fData.status || "Offline";
-                        let bio = fData.bio || "Hey there! I am using SecureChat.";
-                        let dpUrl = fData.dpUrl || "";
-                        let dotColor = status === "Online" ? "#00ffcc" : "#ff4757";
-                        
-                        let dpHTML = dpUrl ? `<img src="${dpUrl}" style="width:100%; height:100%; object-fit:cover;">` : friendName.charAt(0).toUpperCase();
+        window.joinGroup = async function() {
+            let groupName = document.getElementById('search-group').value.trim().toUpperCase();
+            if(groupName.length < 3) return alert("Group name must be 3+ letters.");
+            set(ref(db, `users/${currentUser}/my_groups/${groupName}`), true);
+            document.getElementById('search-group').value = "";
+            showToast("Joined " + groupName);
+        }
 
-                        let card = document.getElementById(`card-${friendName}`);
-                        if(!card) {
+        function loadDashboard() {
+            const listDiv = document.getElementById('contacts-list');
+            listDiv.innerHTML = "";
+            
+            // Load Groups
+            onValue(ref(db, `users/${currentUser}/my_groups`), (snapshot) => {
+                if(snapshot.exists()) {
+                    snapshot.forEach((childSnap) => {
+                        let gName = childSnap.key;
+                        if(!document.getElementById(`group-${gName}`)) {
                             listDiv.innerHTML += `
-                                <div id="card-${friendName}" class="contact-card fade-in" onclick="openPrivateChat('${friendName}')">
-                                    <div class="contact-avatar" id="avatar-${friendName}">${dpHTML}</div>
-                                    <div class="contact-info" style="flex-grow:1; overflow:hidden;">
-                                        <h4 style="color:white; margin-bottom:2px; text-transform:capitalize;">${friendName}</h4>
-                                        <p style="color:#aaa; font-size:0.75rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="bio-${friendName}">${bio}</p>
-                                        <p style="color:#aaa; font-size:0.75rem; margin-top:3px;" id="status-${friendName}"><span style="color:${dotColor};">●</span> ${status}</p>
+                                <div id="group-${gName}" class="contact-card fade-in" onclick="openChat('${gName}', 'group')">
+                                    <div class="contact-avatar group-avatar">👥</div>
+                                    <div class="contact-info" style="flex-grow:1;">
+                                        <h4 style="color:white; margin-bottom:2px;">${gName}</h4>
+                                        <p style="color:#ff4757; font-size:0.75rem;">Squad Group</p>
                                     </div>
                                 </div>`;
-                        } else {
-                            document.getElementById(`avatar-${friendName}`).innerHTML = dpHTML;
-                            document.getElementById(`bio-${friendName}`).innerText = bio;
-                            document.getElementById(`status-${friendName}`).innerHTML = `<span style="color:${dotColor};">●</span> ${status}`;
                         }
                     });
-                });
+                }
+            });
+
+            // Load Friends
+            onValue(ref(db, `users/${currentUser}/my_friends`), (snapshot) => {
+                if(snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        let friendName = childSnapshot.key;
+                        onValue(ref(db, `users/${friendName}`), (friendSnap) => {
+                            let fData = friendSnap.val() || {};
+                            let status = fData.status || "Offline"; let bio = fData.bio || "SecureChat User"; let dpUrl = fData.dpUrl || "";
+                            let dotColor = status === "Online" ? "#00ffcc" : "#ff4757";
+                            let dpHTML = dpUrl ? `<img src="${dpUrl}" style="width:100%; height:100%; object-fit:cover;">` : friendName.charAt(0).toUpperCase();
+
+                            let card = document.getElementById(`card-${friendName}`);
+                            if(!card) {
+                                listDiv.innerHTML += `
+                                    <div id="card-${friendName}" class="contact-card fade-in" onclick="openChat('${friendName}', 'private')">
+                                        <div class="contact-avatar" id="avatar-${friendName}">${dpHTML}</div>
+                                        <div class="contact-info" style="flex-grow:1; overflow:hidden;">
+                                            <h4 style="color:white; margin-bottom:2px; text-transform:capitalize;">${friendName}</h4>
+                                            <p style="color:#aaa; font-size:0.75rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="bio-${friendName}">${bio}</p>
+                                            <p style="color:#aaa; font-size:0.75rem; margin-top:3px;" id="status-${friendName}"><span style="color:${dotColor};">●</span> ${status}</p>
+                                        </div>
+                                    </div>`;
+                            } else {
+                                document.getElementById(`avatar-${friendName}`).innerHTML = dpHTML;
+                                document.getElementById(`bio-${friendName}`).innerText = bio;
+                                document.getElementById(`status-${friendName}`).innerHTML = `<span style="color:${dotColor};">●</span> ${status}`;
+                            }
+                        });
+                    });
+                }
             });
         }
 
-        // 3. CHAT LOGIC (UPDATED DP IN HEADER)
-        window.openPrivateChat = function(friendName) {
-            targetUser = friendName;
-            privateRoomId = [currentUser, targetUser].sort().join("_");
-            messagesRef = ref(db, "chats/" + privateRoomId + "/messages");
-            callRef = ref(db, "chats/" + privateRoomId + "/call");
-            typingRef = ref(db, "chats/" + privateRoomId + "/typing/" + targetUser);
+        // 3. CHAT LOGIC (PRIVATE + GROUP)
+        window.openChat = function(targetId, type) {
+            chatType = type;
+            targetUser = targetId;
+            document.getElementById('messages').innerHTML = ""; 
+            
+            if(chatType === 'private') {
+                privateRoomId = [currentUser, targetUser].sort().join("_");
+                messagesRef = ref(db, "chats/" + privateRoomId + "/messages");
+                callRef = ref(db, "chats/" + privateRoomId + "/call");
+                typingRef = ref(db, "chats/" + privateRoomId + "/typing/" + targetUser);
+                
+                get(child(ref(db), `users/${targetUser}/dpUrl`)).then((snap) => {
+                    let dpUrl = snap.val();
+                    document.getElementById('chat-avatar').innerHTML = dpUrl ? `<img src="${dpUrl}" style="width:100%; height:100%; object-fit:cover;">` : targetUser.charAt(0).toUpperCase();
+                });
+                onValue(typingRef, (snap) => {
+                    if(snap.val()) document.getElementById('chat-status').innerText = "Typing...";
+                    else { get(child(ref(db), `users/${targetUser}/status`)).then(s => { document.getElementById('chat-status').innerText = s.val() || "Offline"; }); }
+                });
+                
+                // Read logic for private chat
+                get(messagesRef).then((snapshot) => {
+                    snapshot.forEach((msgSnap) => { if (msgSnap.val().sender !== currentUser) update(child(messagesRef, msgSnap.key), { read: true }); });
+                });
+
+                listenForCalls();
+
+            } else {
+                // GROUP LOGIC
+                messagesRef = ref(db, "groups/" + targetUser + "/messages");
+                document.getElementById('chat-avatar').innerHTML = "👥";
+                document.getElementById('chat-status').innerText = "Group Squad";
+            }
             
             document.getElementById('contacts-screen').classList.remove('active-screen');
             document.getElementById('chat-screen').classList.add('active-screen', 'fade-in');
             document.getElementById('chat-target-name').innerText = targetUser;
-            
-            // Load Friend's DP in Header
-            get(child(ref(db), `users/${targetUser}/dpUrl`)).then((snap) => {
-                let dpUrl = snap.val();
-                document.getElementById('chat-avatar').innerHTML = dpUrl ? `<img src="${dpUrl}" style="width:100%; height:100%; object-fit:cover;">` : targetUser.charAt(0).toUpperCase();
-            });
 
-            document.getElementById('messages').innerHTML = ""; 
-            
-            onValue(typingRef, (snap) => {
-                if(snap.val()) document.getElementById('chat-status').innerText = "Typing...";
-                else { get(child(ref(db), `users/${targetUser}/status`)).then(s => { document.getElementById('chat-status').innerText = s.val() || "Offline"; }); }
-            });
-
-            get(messagesRef).then((snapshot) => {
-                snapshot.forEach((msgSnap) => { if (msgSnap.val().sender !== currentUser) update(child(messagesRef, msgSnap.key), { read: true }); });
-            });
-
+            // Render Messages
             onChildAdded(messagesRef, (snapshot) => {
                 const data = snapshot.val();
                 const msgKey = snapshot.key;
                 const msgBox = document.getElementById('messages');
                 const msgType = (data.sender === currentUser) ? "sent" : "received";
 
-                if (msgType === "received" && !data.read) update(child(messagesRef, msgKey), { read: true });
+                if (chatType === 'private' && msgType === "received" && !data.read) update(child(messagesRef, msgKey), { read: true });
 
-                let tickElement = (msgType === "sent") ? (data.read ? `<span class="tick tick-blue">✓✓</span>` : `<span class="tick tick-grey">✓</span>`) : '';
+                let tickElement = (chatType === 'private' && msgType === "sent") ? (data.read ? `<span class="tick tick-blue">✓✓</span>` : `<span class="tick tick-grey">✓</span>`) : '';
                 
                 let contentHTML = "";
-                if(data.imageUrl) { contentHTML = `<img src="${data.imageUrl}" class="chat-img" onclick="window.open('${data.imageUrl}')"/><br>`; }
+                // If Group & Received, show sender name
+                if(chatType === 'group' && msgType === 'received') {
+                    contentHTML += `<span class="sender-name">${data.sender}</span>`;
+                }
+
+                if(data.imageUrl) { contentHTML += `<img src="${data.imageUrl}" class="chat-img" onclick="window.open('${data.imageUrl}')"/><br>`; }
                 contentHTML += data.text || "";
 
                 let newMsg = document.createElement('div');
@@ -382,24 +402,22 @@
             });
 
             onChildChanged(messagesRef, (snapshot) => {
-                let msgDiv = document.getElementById("msg-" + snapshot.key);
-                if(msgDiv && snapshot.val().read && snapshot.val().sender === currentUser) {
-                    let tick = msgDiv.querySelector('.tick');
-                    if(tick) { tick.className = "tick tick-blue"; tick.innerText = "✓✓"; }
+                if(chatType === 'private') {
+                    let msgDiv = document.getElementById("msg-" + snapshot.key);
+                    if(msgDiv && snapshot.val().read && snapshot.val().sender === currentUser) {
+                        let tick = msgDiv.querySelector('.tick');
+                        if(tick) { tick.className = "tick tick-blue"; tick.innerText = "✓✓"; }
+                    }
                 }
             });
 
             onChildRemoved(messagesRef, (snapshot) => {
                 let msgDiv = document.getElementById("msg-" + snapshot.key);
                 if(msgDiv) {
-                    msgDiv.style.background = "#ff4757";
-                    msgDiv.style.color = "white";
-                    msgDiv.innerText = "🚫 This message was deleted";
-                    setTimeout(() => msgDiv.remove(), 1500);
+                    msgDiv.style.background = "#ff4757"; msgDiv.style.color = "white";
+                    msgDiv.innerText = "🚫 Deleted"; setTimeout(() => msgDiv.remove(), 1500);
                 }
             });
-
-            listenForCalls();
         }
 
         window.deleteMessage = function(msgKey, sender) {
@@ -410,9 +428,7 @@
 
         function showToast(text) {
             let toast = document.getElementById('toast-msg');
-            toast.innerText = text;
-            toast.style.display = 'block';
-            setTimeout(() => toast.style.display = 'none', 2000);
+            toast.innerText = text; toast.style.display = 'block'; setTimeout(() => toast.style.display = 'none', 2000);
         }
 
         window.goBackToContacts = function() {
@@ -426,12 +442,12 @@
             if(input.value.trim() !== "") {
                 push(messagesRef, { sender: currentUser, text: input.value, read: false }); 
                 input.value = '';
-                set(ref(db, `chats/${privateRoomId}/typing/${currentUser}`), false);
+                if(chatType === 'private') set(ref(db, `chats/${privateRoomId}/typing/${currentUser}`), false);
             }
         }
         
         document.getElementById("msg-input").addEventListener("input", () => {
-            if(targetUser) {
+            if(chatType === 'private' && targetUser) {
                 set(ref(db, `chats/${privateRoomId}/typing/${currentUser}`), true);
                 clearTimeout(typingTimer);
                 typingTimer = setTimeout(() => { set(ref(db, `chats/${privateRoomId}/typing/${currentUser}`), false); }, 1500);
@@ -441,9 +457,8 @@
 
         /* -- IMAGE CHAT COMPRESSION -- */
         document.getElementById('image-upload').addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if(!file) return;
-            showToast("Compressing Image...");
+            const file = event.target.files[0]; if(!file) return;
+            showToast("Compressing...");
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = new Image();
@@ -454,8 +469,7 @@
                     if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } } 
                     else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
                     canvas.width = width; canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
+                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
                     const compressedBase64 = canvas.toDataURL('image/jpeg', 0.5); 
                     push(messagesRef, { sender: currentUser, text: "📷 Image", imageUrl: compressedBase64, read: false });
                     showToast("Sent!");
@@ -465,10 +479,15 @@
             reader.readAsDataURL(file);
         });
 
-        /* -- WEBRTC FUNCTIONS -- */
+        /* -- WEBRTC FUNCTIONS (VC 1-ON-1 ONLY) -- */
+        window.startCallClick = function() {
+            if(chatType === 'group') return alert("Video Calls are currently for 1-on-1 private chats only! 📹");
+            startCall();
+        }
+
         async function setupMedia() {
             document.getElementById('video-overlay').style.display = 'flex';
-            localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacingMode }, audio: true });
+            localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: true });
             document.getElementById('localVideo').srcObject = localStream;
             peerConnection = new RTCPeerConnection(servers);
             localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
@@ -476,12 +495,10 @@
         }
         window.flipCamera = async function() {
             if (!localStream) return;
-            currentFacingMode = (currentFacingMode === "user") ? "environment" : "user";
             localStream.getVideoTracks().forEach(track => track.stop());
-            const newStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacingMode } });
+            const newStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
             const newVideoTrack = newStream.getVideoTracks()[0];
-            localStream.removeTrack(localStream.getVideoTracks()[0]);
-            localStream.addTrack(newVideoTrack);
+            localStream.removeTrack(localStream.getVideoTracks()[0]); localStream.addTrack(newVideoTrack);
             document.getElementById('localVideo').srcObject = localStream;
             if (peerConnection) { const sender = peerConnection.getSenders().find(s => s.track.kind === 'video'); if (sender) sender.replaceTrack(newVideoTrack); }
         }
