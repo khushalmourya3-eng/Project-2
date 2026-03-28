@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecureChat // V11 (Image & Text Pro)</title>
+    <title>SecureChat // V12 (Profile & Bio)</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
         :root { --primary: #00ffcc; --msg-sent: #004d40; --msg-received: #2d3436; --ticks: #95a5a6; --read-ticks: #3498db; }
@@ -19,59 +19,65 @@
         .screen { display: none; width: 100%; max-width: 450px; height: 100%; flex-direction: column; position: relative; margin: 0 auto; }
         .active-screen { display: flex; }
 
-        #login-screen { justify-content: center; align-items: center; padding: 40px; }
-        .login-box { background: rgba(20, 20, 25, 0.85); backdrop-filter: blur(10px); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); width: 90%; text-align: center; border: 1px solid rgba(0,255,204,0.3); }
-        h2.brand { margin-bottom: 25px; color: var(--primary); font-size: 2rem; font-weight: 700; letter-spacing: -1px;}
+        /* INPUTS & BUTTONS */
         input[type="text"], input[type="password"] { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: 1px solid #333; background: rgba(0,0,0,0.6); color: white; outline: none; font-size: 1rem; }
         input:focus { border-color: var(--primary); }
         .btn { width: 100%; padding: 15px; background: var(--primary); color: black; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 1.1rem; transition: 0.3s; }
         .btn:hover { background: #00e6b8; transform: translateY(-2px); }
 
-        #contacts-screen { background: rgba(30, 30, 46, 0.75); backdrop-filter: blur(15px); }
+        /* LOGIN */
+        #login-screen { justify-content: center; align-items: center; padding: 40px; }
+        .login-box { background: rgba(20, 20, 25, 0.85); backdrop-filter: blur(10px); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); width: 90%; text-align: center; border: 1px solid rgba(0,255,204,0.3); }
+        h2.brand { margin-bottom: 25px; color: var(--primary); font-size: 2rem; font-weight: 700; letter-spacing: -1px;}
+
+        /* HEADER */
         .header { background: rgba(20, 20, 25, 0.95); padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 10; display: flex; justify-content: space-between; align-items: center;}
+        
+        /* CONTACTS */
+        #contacts-screen { background: rgba(30, 30, 46, 0.75); backdrop-filter: blur(15px); }
         .search-area { padding: 15px; background: rgba(0,0,0,0.4); border-bottom: 1px solid rgba(255,255,255,0.05); display: flex;}
         .search-input { width: 70%; padding: 10px; border-radius: 8px; border: none; background: rgba(255,255,255,0.1); color: white; outline: none; }
         .add-btn { width: 25%; padding: 10px; background: var(--primary); border-radius: 8px; border: none; font-weight: bold; margin-left: 5%; cursor: pointer; color: black;}
-        
         #contacts-list { flex-grow: 1; overflow-y: auto; padding: 10px; }
-        .contact-card { display: flex; align-items: center; padding: 15px; background: rgba(0,0,0,0.5); margin-bottom: 10px; border-radius: 12px; cursor: pointer; border: 1px solid transparent;}
+        .contact-card { display: flex; align-items: center; padding: 15px; background: rgba(0,0,0,0.5); margin-bottom: 10px; border-radius: 12px; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
         .contact-card:hover { background: rgba(0,255,204,0.1); border-color: rgba(0,255,204,0.2); }
-        .contact-avatar { width: 45px; height: 45px; background: var(--primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: black; font-weight: bold; margin-right: 15px; }
+        .contact-avatar { width: 45px; height: 45px; background: var(--primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: black; font-weight: bold; margin-right: 15px; overflow: hidden; }
 
+        /* PROFILE OVERLAY */
+        #profile-screen { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(20, 20, 25, 0.98); z-index: 50; display: none; flex-direction: column; }
+        .profile-container { padding: 30px; text-align: center; }
+        .dp-large { width: 120px; height: 120px; background: var(--primary); border-radius: 50%; margin: 0 auto 20px; display: flex; justify-content: center; align-items: center; font-size: 3rem; color: black; font-weight: bold; cursor: pointer; overflow: hidden; border: 3px solid var(--primary); }
+
+        /* CHAT SCREEN */
         #chat-screen { background: rgba(18, 18, 26, 0.85); backdrop-filter: blur(15px); }
         #messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; scroll-behavior: smooth; }
         .msg { padding: 12px 18px; border-radius: 18px; max-width: 80%; word-wrap: break-word; position: relative; font-size: 0.95rem; line-height: 1.4; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: 0.3s; cursor: pointer; }
         .msg.sent { background: var(--msg-sent); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
         .msg.received { background: var(--msg-received); color: white; align-self: flex-start; border-bottom-left-radius: 4px; }
         .msg:active { transform: scale(0.95); opacity: 0.8; }
-        
-        /* IMAGE PREVIEW IN CHAT */
-        .chat-img { max-width: 100%; border-radius: 10px; margin-bottom: 5px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
-
+        .chat-img { max-width: 100%; border-radius: 10px; margin-bottom: 5px; border: 1px solid rgba(255,255,255,0.1); }
         .tick { position: absolute; bottom: 5px; right: 10px; font-size: 0.8rem;}
-        .tick-grey { color: var(--ticks); } 
-        .tick-blue { color: var(--read-ticks); } 
+        .tick-grey { color: var(--ticks); } .tick-blue { color: var(--read-ticks); } 
 
-        #input-area { display: flex; align-items: center; padding: 12px; background: rgba(20, 20, 25, 0.95); width: 100%; border-top: 1px solid rgba(255,255,255,0.05); }
-        
-        /* ATTACH BUTTON */
+        /* CHAT INPUT */
+        #input-area { display: flex; align-items: center; padding: 12px; background: rgba(20, 20, 25, 0.95); border-top: 1px solid rgba(255,255,255,0.05); }
         #attach-btn { background: none; color: #aaa; border: none; font-size: 1.5rem; cursor: pointer; margin-right: 10px; transition: 0.2s; }
-        #attach-btn:hover { color: var(--primary); transform: scale(1.1); }
-        
-        #msg-input { flex-grow: 1; border-radius: 20px; padding: 12px 15px; margin-right: 10px; border: none; background: rgba(255,255,255,0.1); color: white; outline:none; font-size: 1rem; }
+        #attach-btn:hover { color: var(--primary); }
+        #msg-input { flex-grow: 1; border-radius: 20px; padding: 12px 15px; margin-right: 10px; border: none; background: rgba(255,255,255,0.1); color: white; outline:none; }
         #send-btn { background: var(--primary); color: black; border: none; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.1rem; }
 
-        /* PRO VIDEO CALL UI */
+        /* UTILS */
+        .toast { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px; font-size: 0.85rem; z-index: 200; display: none; }
+        
+        /* VIDEO CALL */
         #video-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 100; flex-direction: column; }
         #remoteVideo { width: 100%; height: 100%; object-fit: cover; background: #111; }
-        #localVideo { width: 100px; height: 150px; position: absolute; bottom: 150px; right: 20px; object-fit: cover; border: 2px solid var(--primary); border-radius: 10px; background: #333; z-index: 101; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        #localVideo { width: 100px; height: 150px; position: absolute; bottom: 150px; right: 20px; object-fit: cover; border: 2px solid var(--primary); border-radius: 10px; background: #333; z-index: 101; }
         #call-controls { position: absolute; bottom: 80px; width: 100%; display: flex; justify-content: center; z-index: 102; }
         .end-btn { padding: 15px 40px; border-radius: 30px; font-weight: bold; cursor: pointer; border: none; font-size: 1.1rem; background: #ff003c; color: white; }
         .flip-btn { position: absolute; top: 20px; right: 20px; z-index: 105; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); color: white; border: 2px solid white; border-radius: 50%; width: 50px; height: 50px; font-size: 1.2rem; display: flex; justify-content: center; align-items: center; cursor: pointer; }
         #incoming-alert { display: none; background: #ff003c; color: white; padding: 15px; text-align: center; font-weight: bold; cursor: pointer; animation: blink 1s infinite; z-index: 110; position: absolute; width: 100%; top: 0; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-        .toast { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px; font-size: 0.85rem; z-index: 200; display: none; }
     </style>
 </head>
 <body>
@@ -89,13 +95,33 @@
     <div id="contacts-screen" class="screen">
         <div class="header">
             <h3 id="welcome-user">Chats</h3>
-            <button class="btn" style="width: auto; padding: 5px 10px; margin: 0; font-size: 0.8rem;" onclick="location.reload()">Logout</button>
+            <div>
+                <button class="btn" style="width: auto; padding: 5px 10px; margin: 0; font-size: 1rem; background:none; border:1px solid var(--primary); color:var(--primary);" onclick="openProfile()">⚙️ Profile</button>
+                <button class="btn" style="width: auto; padding: 5px 10px; margin: 0 0 0 5px; font-size: 0.8rem;" onclick="location.reload()">Logout</button>
+            </div>
         </div>
         <div class="search-area">
             <input type="text" id="search-friend" class="search-input" placeholder="Search Friend ID...">
             <button class="add-btn" onclick="addFriend()">Add</button>
         </div>
         <div id="contacts-list"></div>
+    </div>
+
+    <div id="profile-screen" class="fade-in">
+        <div class="header">
+            <h3>Edit Profile</h3>
+            <button style="background:none; border:none; color:var(--primary); font-size:1.5rem; cursor:pointer;" onclick="closeProfile()">✖</button>
+        </div>
+        <div class="profile-container">
+            <p style="color:#aaa; font-size:0.8rem; margin-bottom:10px;">Tap circle to change DP</p>
+            <div class="dp-large" id="my-dp-preview" onclick="document.getElementById('dp-upload').click()">?</div>
+            <input type="file" id="dp-upload" accept="image/*" style="display: none;" onchange="handleDpUpload(event)">
+            
+            <h3 id="profile-username" style="margin-bottom: 20px; color:var(--primary); text-transform:capitalize;">User</h3>
+            <label style="color:#aaa; font-size:0.8rem; display:block; text-align:left; margin-bottom:5px;">About / Bio:</label>
+            <input type="text" id="my-bio" placeholder="Busy studying NEET...">
+            <button class="btn" onclick="saveProfile()">Save Profile</button>
+        </div>
     </div>
 
     <div id="chat-screen" class="screen">
@@ -119,7 +145,6 @@
         <div id="input-area">
             <input type="file" id="image-upload" accept="image/*" style="display: none;">
             <button id="attach-btn" onclick="document.getElementById('image-upload').click()">📷</button>
-            
             <input type="text" id="msg-input" placeholder="Secure message...">
             <button id="send-btn" onclick="sendRealMsg()">➤</button>
         </div>
@@ -151,16 +176,14 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         
-        let currentUser = "";
-        let targetUser = "";
-        let privateRoomId = "";
+        let currentUser = ""; let targetUser = ""; let privateRoomId = "";
         let messagesRef, callRef, typingRef, myStatusRef;
-        let typingTimer;
-
-        let localStream;
-        let peerConnection;
+        let typingTimer; let pendingDpBase64 = null; // Profile DP Temp storage
+        
+        let localStream; let peerConnection;
         const servers = { iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] };
 
+        // 1. AUTH
         window.authenticate = async function() {
             let user = document.getElementById('username').value.trim().toLowerCase();
             let pass = document.getElementById('password').value.trim();
@@ -171,7 +194,7 @@
                 if (snapshot.exists() && snapshot.val().password === pass) {
                     login(user);
                 } else if (!snapshot.exists()) {
-                    set(ref(db, 'users/' + user), { password: pass });
+                    set(ref(db, 'users/' + user), { password: pass, bio: "Hey there! I am using SecureChat." });
                     login(user);
                 } else {
                     document.getElementById('login-error').innerText = "Wrong password!";
@@ -190,11 +213,71 @@
             setTimeout(() => {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('contacts-screen').classList.add('active-screen', 'fade-in');
-                document.getElementById('welcome-user').innerText = currentUser;
+                document.getElementById('welcome-user').innerText = "Hi, " + currentUser;
                 loadMyFriendsDashboard();
             }, 500);
         }
 
+        /* --- NEW: PROFILE LOGIC (V12) --- */
+        window.openProfile = function() {
+            document.getElementById('profile-screen').style.display = 'flex';
+            document.getElementById('profile-username').innerText = currentUser;
+            
+            // Load existing bio and DP
+            get(child(ref(db), `users/${currentUser}`)).then((snap) => {
+                let data = snap.val();
+                if(data.bio) document.getElementById('my-bio').value = data.bio;
+                let dpBox = document.getElementById('my-dp-preview');
+                if(data.dpUrl) {
+                    dpBox.innerHTML = `<img src="${data.dpUrl}" style="width:100%; height:100%; object-fit:cover;">`;
+                    pendingDpBase64 = data.dpUrl;
+                } else {
+                    dpBox.innerHTML = currentUser.charAt(0).toUpperCase();
+                }
+            });
+        }
+
+        window.closeProfile = function() { document.getElementById('profile-screen').style.display = 'none'; }
+
+        window.handleDpUpload = function(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    // Extreme compress for DP (150x150 max) to save DB space
+                    const canvas = document.createElement('canvas');
+                    const MAX_SIZE = 150; 
+                    let width = img.width; let height = img.height;
+                    if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
+                    else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
+                    
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    pendingDpBase64 = canvas.toDataURL('image/jpeg', 0.6);
+                    document.getElementById('my-dp-preview').innerHTML = `<img src="${pendingDpBase64}" style="width:100%; height:100%; object-fit:cover;">`;
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        window.saveProfile = function() {
+            let newBio = document.getElementById('my-bio').value.trim();
+            let updates = {};
+            if(newBio) updates['/bio'] = newBio;
+            if(pendingDpBase64) updates['/dpUrl'] = pendingDpBase64;
+            
+            update(ref(db, `users/${currentUser}`), updates).then(() => {
+                showToast("Profile Updated!");
+                closeProfile();
+            });
+        }
+
+        // 2. CONTACTS (UPDATED FOR DP & BIO)
         window.addFriend = async function() {
             let friendId = document.getElementById('search-friend').value.trim().toLowerCase();
             if(friendId === currentUser) return alert("Cannot add yourself.");
@@ -214,28 +297,38 @@
                 
                 snapshot.forEach((childSnapshot) => {
                     let friendName = childSnapshot.key;
-                    onValue(ref(db, `users/${friendName}/status`), (statusSnap) => {
-                        let status = statusSnap.val() || "Offline";
+                    // Listen to full friend object to get Status, Bio, and DP live
+                    onValue(ref(db, `users/${friendName}`), (friendSnap) => {
+                        let fData = friendSnap.val() || {};
+                        let status = fData.status || "Offline";
+                        let bio = fData.bio || "Hey there! I am using SecureChat.";
+                        let dpUrl = fData.dpUrl || "";
                         let dotColor = status === "Online" ? "#00ffcc" : "#ff4757";
                         
+                        let dpHTML = dpUrl ? `<img src="${dpUrl}" style="width:100%; height:100%; object-fit:cover;">` : friendName.charAt(0).toUpperCase();
+
                         let card = document.getElementById(`card-${friendName}`);
                         if(!card) {
                             listDiv.innerHTML += `
                                 <div id="card-${friendName}" class="contact-card fade-in" onclick="openPrivateChat('${friendName}')">
-                                    <div class="contact-avatar">${friendName.charAt(0).toUpperCase()}</div>
-                                    <div class="contact-info">
-                                        <h4 style="color:white; margin-bottom:3px; text-transform:capitalize;">${friendName}</h4>
-                                        <p style="color:#aaa; font-size:0.85rem;"><span style="color:${dotColor};">●</span> ${status}</p>
+                                    <div class="contact-avatar" id="avatar-${friendName}">${dpHTML}</div>
+                                    <div class="contact-info" style="flex-grow:1; overflow:hidden;">
+                                        <h4 style="color:white; margin-bottom:2px; text-transform:capitalize;">${friendName}</h4>
+                                        <p style="color:#aaa; font-size:0.75rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="bio-${friendName}">${bio}</p>
+                                        <p style="color:#aaa; font-size:0.75rem; margin-top:3px;" id="status-${friendName}"><span style="color:${dotColor};">●</span> ${status}</p>
                                     </div>
                                 </div>`;
                         } else {
-                            card.querySelector('p').innerHTML = `<span style="color:${dotColor};">●</span> ${status}`;
+                            document.getElementById(`avatar-${friendName}`).innerHTML = dpHTML;
+                            document.getElementById(`bio-${friendName}`).innerText = bio;
+                            document.getElementById(`status-${friendName}`).innerHTML = `<span style="color:${dotColor};">●</span> ${status}`;
                         }
                     });
                 });
             });
         }
 
+        // 3. CHAT LOGIC (UPDATED DP IN HEADER)
         window.openPrivateChat = function(friendName) {
             targetUser = friendName;
             privateRoomId = [currentUser, targetUser].sort().join("_");
@@ -246,22 +339,22 @@
             document.getElementById('contacts-screen').classList.remove('active-screen');
             document.getElementById('chat-screen').classList.add('active-screen', 'fade-in');
             document.getElementById('chat-target-name').innerText = targetUser;
-            document.getElementById('chat-avatar').innerText = targetUser.charAt(0).toUpperCase();
+            
+            // Load Friend's DP in Header
+            get(child(ref(db), `users/${targetUser}/dpUrl`)).then((snap) => {
+                let dpUrl = snap.val();
+                document.getElementById('chat-avatar').innerHTML = dpUrl ? `<img src="${dpUrl}" style="width:100%; height:100%; object-fit:cover;">` : targetUser.charAt(0).toUpperCase();
+            });
+
             document.getElementById('messages').innerHTML = ""; 
             
             onValue(typingRef, (snap) => {
                 if(snap.val()) document.getElementById('chat-status').innerText = "Typing...";
-                else {
-                    get(child(ref(db), `users/${targetUser}/status`)).then(s => {
-                        document.getElementById('chat-status').innerText = s.val() || "Offline";
-                    });
-                }
+                else { get(child(ref(db), `users/${targetUser}/status`)).then(s => { document.getElementById('chat-status').innerText = s.val() || "Offline"; }); }
             });
 
             get(messagesRef).then((snapshot) => {
-                snapshot.forEach((msgSnap) => {
-                    if (msgSnap.val().sender !== currentUser) update(child(messagesRef, msgSnap.key), { read: true });
-                });
+                snapshot.forEach((msgSnap) => { if (msgSnap.val().sender !== currentUser) update(child(messagesRef, msgSnap.key), { read: true }); });
             });
 
             onChildAdded(messagesRef, (snapshot) => {
@@ -274,11 +367,8 @@
 
                 let tickElement = (msgType === "sent") ? (data.read ? `<span class="tick tick-blue">✓✓</span>` : `<span class="tick tick-grey">✓</span>`) : '';
                 
-                // IMAGE CHECK LOGIC
                 let contentHTML = "";
-                if(data.imageUrl) {
-                    contentHTML = `<img src="${data.imageUrl}" class="chat-img" onclick="window.open('${data.imageUrl}')"/><br>`;
-                }
+                if(data.imageUrl) { contentHTML = `<img src="${data.imageUrl}" class="chat-img" onclick="window.open('${data.imageUrl}')"/><br>`; }
                 contentHTML += data.text || "";
 
                 let newMsg = document.createElement('div');
@@ -314,10 +404,7 @@
 
         window.deleteMessage = function(msgKey, sender) {
             if(sender === currentUser) {
-                if(confirm("Delete this message for everyone?")) {
-                    remove(child(messagesRef, msgKey));
-                    showToast("Message Deleted");
-                }
+                if(confirm("Delete this message for everyone?")) { remove(child(messagesRef, msgKey)); showToast("Deleted"); }
             } else { alert("You can only delete your own messages!"); }
         }
 
@@ -352,46 +439,25 @@
         });
         document.getElementById("msg-input").addEventListener("keypress", (e) => { if(e.key === "Enter") window.sendRealMsg(); });
 
-        /* --- THE BASE64 IMAGE HACKER LOGIC --- */
+        /* -- IMAGE CHAT COMPRESSION -- */
         document.getElementById('image-upload').addEventListener('change', function(event) {
             const file = event.target.files[0];
             if(!file) return;
-            
             showToast("Compressing Image...");
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = new Image();
                 img.onload = function() {
-                    // Compress image using Canvas taaki Database hang na ho
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 500;
-                    const MAX_HEIGHT = 500;
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > height) {
-                        if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                    } else {
-                        if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
+                    const MAX_WIDTH = 500; const MAX_HEIGHT = 500;
+                    let width = img.width; let height = img.height;
+                    if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } } 
+                    else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
+                    canvas.width = width; canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-
-                    // Convert back to Base64 code (quality 50%)
                     const compressedBase64 = canvas.toDataURL('image/jpeg', 0.5); 
-
-                    // Send to Firebase directly as Text
-                    push(messagesRef, {
-                        sender: currentUser,
-                        text: "📷 Image", // Chota text fallback ke liye
-                        imageUrl: compressedBase64, // Pura photo ka code
-                        read: false
-                    });
-                    
+                    push(messagesRef, { sender: currentUser, text: "📷 Image", imageUrl: compressedBase64, read: false });
                     showToast("Sent!");
                 }
                 img.src = e.target.result;
@@ -417,10 +483,7 @@
             localStream.removeTrack(localStream.getVideoTracks()[0]);
             localStream.addTrack(newVideoTrack);
             document.getElementById('localVideo').srcObject = localStream;
-            if (peerConnection) {
-                const sender = peerConnection.getSenders().find(s => s.track.kind === 'video');
-                if (sender) sender.replaceTrack(newVideoTrack);
-            }
+            if (peerConnection) { const sender = peerConnection.getSenders().find(s => s.track.kind === 'video'); if (sender) sender.replaceTrack(newVideoTrack); }
         }
         window.startCall = async function() {
             await setupMedia();
@@ -438,7 +501,7 @@
                     let offerObj = JSON.parse(data);
                     if(offerObj.caller !== currentUser) {
                         document.getElementById('incoming-alert').style.display = 'block';
-                        document.getElementById('incoming-alert').innerText = `📲 VC FROM ${offerObj.caller.toUpperCase()}! TAP TO ANSWER`;
+                        document.getElementById('incoming-alert').innerText = `📲 VC FROM ${offerObj.caller.toUpperCase()}!`;
                     }
                 } else { document.getElementById('incoming-alert').style.display = 'none'; endCallUI(); }
             });
