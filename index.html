@@ -1,22 +1,41 @@
-npm install firebase.<!DOCTYPE html>
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCbJmwbTt7Ds1GVAbQnn0yJPI2STl1B5WM",
+  authDomain: "chat-18904.firebaseapp.com",
+  databaseURL: "https://chat-18904-default-rtdb.firebaseio.com",
+  projectId: "chat-18904",
+  storageBucket: "chat-18904.firebasestorage.app",
+  messagingSenderId: "833373288874",
+  appId: "1:833373288874:web:ef87a7109f7f1fe9a853d3"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);.<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecureChat // V2</title>
+    <title>SecureChat // V3 (Video Enabled)</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #0f0f13; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        body { background-color: #0f0f13; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         
-        #login-screen { background: #1c1c24; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 90%; max-width: 400px; text-align: center; }
+        #login-screen { background: #1c1c24; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 90%; max-width: 400px; text-align: center; z-index: 10; }
         h2 { margin-bottom: 20px; color: #00ffcc; }
         input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; background: #2a2a35; color: white; outline: none; }
         .btn { width: 100%; padding: 12px; background: #00ffcc; color: black; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
         .btn:hover { background: #00e6b8; transform: scale(1.02); }
+        .btn-red { background: #ff003c; color: white; }
+        .btn-red:hover { background: #d40032; }
 
-        #chat-screen { display: none; width: 100%; max-width: 500px; height: 90vh; background: #1c1c24; border-radius: 15px; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        #chat-screen { display: none; width: 100%; max-width: 500px; height: 100vh; background: #1c1c24; flex-direction: column; position: relative; }
         #chat-header { background: #2a2a35; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00ffcc; }
-        .call-btn { background: #ff003c; color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        .call-btn { background: #00ffcc; color: black; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; }
         
         #messages { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         .msg { padding: 10px 15px; border-radius: 15px; max-width: 75%; word-wrap: break-word; position: relative; }
@@ -27,36 +46,54 @@ npm install firebase.<!DOCTYPE html>
         #input-area { display: flex; padding: 10px; background: #2a2a35; }
         #msg-input { flex-grow: 1; border-radius: 20px; padding: 10px 15px; margin-right: 10px; border: none; background: #1c1c24; color: white; outline:none; }
         #send-btn { background: #00ffcc; color: black; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.2rem; cursor: pointer; }
+
+        /* VIDEO CALL UI */
+        #video-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 100; flex-direction: column; }
+        #remoteVideo { width: 100%; height: 100%; object-fit: cover; background: #111; }
+        #localVideo { width: 100px; height: 150px; position: absolute; bottom: 80px; right: 20px; object-fit: cover; border: 2px solid #00ffcc; border-radius: 10px; background: #333; }
+        #call-controls { position: absolute; bottom: 20px; width: 100%; display: flex; justify-content: center; gap: 20px; }
+        .control-btn { padding: 15px 30px; border-radius: 30px; font-weight: bold; cursor: pointer; border: none; }
+        
+        #incoming-alert { display: none; background: #ff003c; color: white; padding: 10px; text-align: center; font-weight: bold; cursor: pointer; animation: blink 1s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
-        <h2>SecureChat 💬</h2>
+        <h2>SecureChat V3 📹</h2>
         <input type="text" id="username" placeholder="Enter Your Name">
-        <button class="btn" onclick="startChat()">Enter Chat Room</button>
+        <button class="btn" onclick="startChat()">Enter Secure Node</button>
     </div>
 
     <div id="chat-screen">
+        <div id="incoming-alert" onclick="answerCall()">📲 INCOMING CALL! TAP TO ANSWER</div>
         <div id="chat-header">
             <h3 id="user-display">Chat Room</h3>
-            <button class="call-btn" onclick="alert('Call feature coming in Phase 3!')">📞 Call</button>
+            <button class="call-btn" onclick="startCall()">📹 Video Call</button>
         </div>
         
-        <div id="messages">
-            </div>
+        <div id="messages"></div>
 
         <div id="input-area">
-            <input type="text" id="msg-input" placeholder="Type a message (Emojis OK!)">
+            <input type="text" id="msg-input" placeholder="Message...">
             <button id="send-btn" onclick="sendRealMsg()">➤</button>
+        </div>
+
+        <div id="video-overlay">
+            <video id="remoteVideo" autoplay playsinline></video>
+            <video id="localVideo" autoplay playsinline muted></video>
+            <div id="call-controls">
+                <button class="control-btn btn-red" onclick="endCall()">End Call</button>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+        import { getDatabase, ref, push, onChildAdded, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-        // ⚠️ ADMIN WARNING: Yahan Apna Asli Firebase Config Paste Karna Hai 👇
+        // ⚠️ ADMIN: YAHAN APNI PURANI FIREBASE CONFIG PASTE KARNA!
         const firebaseConfig = {
             apiKey: "YAHAN_APNI_API_KEY_DALO",
             authDomain: "chat-18904.firebaseapp.com",
@@ -66,61 +103,147 @@ npm install firebase.<!DOCTYPE html>
             messagingSenderId: "833373288874",
             appId: "YAHAN_APNA_APP_ID_DALO"
         };
-        // 👆 -------------------------------------------------------------------
+        // 👆 --------------------------------------------------------
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const messagesRef = ref(db, "messages");
+        const callRef = ref(db, "call"); 
 
         let currentUser = "";
+        let localStream;
+        let peerConnection;
 
-        // Login Logic
+        // WebRTC Google STUN Servers (IP dhundhne ke liye)
+        const servers = {
+            iceServers: [
+                { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }
+            ]
+        };
+
+        // --- 1. CHAT LOGIC ---
         window.startChat = function() {
             let user = document.getElementById('username').value;
             if(user.trim().length > 2) {
                 currentUser = user;
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('chat-screen').style.display = 'flex';
-                document.getElementById('user-display').innerText = currentUser + " (Online)";
-            } else { alert("Naam toh dalo bhai!"); }
-        }
-
-        // Send Message to Cloud
-        window.sendRealMsg = function() {
-            let input = document.getElementById('msg-input');
-            let text = input.value;
-            if(text.trim() !== "") {
-                push(messagesRef, {
-                    sender: currentUser,
-                    text: text,
-                    timestamp: Date.now()
-                });
-                input.value = '';
+                document.getElementById('user-display').innerText = currentUser;
+                listenForCalls(); // Check if someone is calling
             }
         }
 
-        // Enter key shortcut
-        document.getElementById("msg-input").addEventListener("keypress", function(e) {
-            if (e.key === "Enter") { window.sendRealMsg(); }
-        });
+        window.sendRealMsg = function() {
+            let input = document.getElementById('msg-input');
+            if(input.value.trim() !== "") {
+                push(messagesRef, { sender: currentUser, text: input.value });
+                input.value = '';
+            }
+        }
+        document.getElementById("msg-input").addEventListener("keypress", (e) => { if(e.key === "Enter") window.sendRealMsg(); });
 
-        // Receive Messages from Cloud (Real-time listener)
         onChildAdded(messagesRef, (snapshot) => {
             const data = snapshot.val();
             const msgBox = document.getElementById('messages');
-            
-            // Check message kisne bheja
             const msgType = (data.sender === currentUser) ? "sent" : "received";
-            
-            msgBox.innerHTML += `
-                <div class="msg ${msgType}">
-                    <span class="sender-name">${data.sender}</span>
-                    ${data.text}
-                </div>
-            `;
+            msgBox.innerHTML += `<div class="msg ${msgType}"><span class="sender-name">${data.sender}</span>${data.text}</div>`;
             msgBox.scrollTop = msgBox.scrollHeight;
         });
+
+        // --- 2. WEBRTC VIDEO CALL LOGIC ---
+        async function setupMedia() {
+            document.getElementById('video-overlay').style.display = 'flex';
+            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            document.getElementById('localVideo').srcObject = localStream;
+            
+            peerConnection = new RTCPeerConnection(servers);
+            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+            peerConnection.ontrack = (event) => {
+                document.getElementById('remoteVideo').srcObject = event.streams[0];
+            };
+        }
+
+        // Caller: Call Start Karega
+        window.startCall = async function() {
+            await setupMedia();
+            
+            peerConnection.onicecandidate = event => {
+                if(event.candidate) set(ref(db, "call/offerCandidate"), JSON.stringify(event.candidate));
+            };
+
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+            set(ref(db, "call/offer"), JSON.stringify({ type: offer.type, sdp: offer.sdp, caller: currentUser }));
+
+            // Listen for Answer
+            onValue(ref(db, "call/answer"), (snapshot) => {
+                const data = snapshot.val();
+                if(data && !peerConnection.currentRemoteDescription) {
+                    peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(data)));
+                }
+            });
+
+            // Listen for Remote ICE
+            onValue(ref(db, "call/answerCandidate"), (snapshot) => {
+                const data = snapshot.val();
+                if(data) peerConnection.addIceCandidate(new RTCIceCandidate(JSON.parse(data)));
+            });
+        }
+
+        // Receiver: Listen for Incoming Calls
+        function listenForCalls() {
+            onValue(ref(db, "call/offer"), (snapshot) => {
+                const data = snapshot.val();
+                if(data) {
+                    let offerObj = JSON.parse(data);
+                    if(offerObj.caller !== currentUser) {
+                        document.getElementById('incoming-alert').style.display = 'block';
+                        document.getElementById('incoming-alert').innerText = `📲 INCOMING CALL FROM ${offerObj.caller}! TAP TO ANSWER`;
+                    }
+                } else {
+                    document.getElementById('incoming-alert').style.display = 'none';
+                    endCallUI(); // If offer is removed, end call
+                }
+            });
+        }
+
+        // Receiver: Answer Call
+        window.answerCall = async function() {
+            document.getElementById('incoming-alert').style.display = 'none';
+            await setupMedia();
+
+            peerConnection.onicecandidate = event => {
+                if(event.candidate) set(ref(db, "call/answerCandidate"), JSON.stringify(event.candidate));
+            };
+
+            onValue(ref(db, "call/offer"), async (snapshot) => {
+                const data = snapshot.val();
+                if(data) {
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(data)));
+                    const answer = await peerConnection.createAnswer();
+                    await peerConnection.setLocalDescription(answer);
+                    set(ref(db, "call/answer"), JSON.stringify({ type: answer.type, sdp: answer.sdp }));
+                }
+            }, { onlyOnce: true });
+
+            onValue(ref(db, "call/offerCandidate"), (snapshot) => {
+                const data = snapshot.val();
+                if(data) peerConnection.addIceCandidate(new RTCIceCandidate(JSON.parse(data)));
+            });
+        }
+
+        // Hangup
+        window.endCall = function() {
+            remove(callRef); // Delete call data from database
+            endCallUI();
+        }
+
+        function endCallUI() {
+            if(peerConnection) peerConnection.close();
+            if(localStream) localStream.getTracks().forEach(track => track.stop());
+            document.getElementById('video-overlay').style.display = 'none';
+        }
     </script>
 </body>
 </html>
