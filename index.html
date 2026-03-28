@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecureChat // V10 (Typing & Delete Sync)</title>
+    <title>SecureChat // V11 (Image & Text Pro)</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
         :root { --primary: #00ffcc; --msg-sent: #004d40; --msg-received: #2d3436; --ticks: #95a5a6; --read-ticks: #3498db; }
@@ -22,7 +22,7 @@
         #login-screen { justify-content: center; align-items: center; padding: 40px; }
         .login-box { background: rgba(20, 20, 25, 0.85); backdrop-filter: blur(10px); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); width: 90%; text-align: center; border: 1px solid rgba(0,255,204,0.3); }
         h2.brand { margin-bottom: 25px; color: var(--primary); font-size: 2rem; font-weight: 700; letter-spacing: -1px;}
-        input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: 1px solid #333; background: rgba(0,0,0,0.6); color: white; outline: none; font-size: 1rem; }
+        input[type="text"], input[type="password"] { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: 1px solid #333; background: rgba(0,0,0,0.6); color: white; outline: none; font-size: 1rem; }
         input:focus { border-color: var(--primary); }
         .btn { width: 100%; padding: 15px; background: var(--primary); color: black; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 1.1rem; transition: 0.3s; }
         .btn:hover { background: #00e6b8; transform: translateY(-2px); }
@@ -43,15 +43,23 @@
         .msg { padding: 12px 18px; border-radius: 18px; max-width: 80%; word-wrap: break-word; position: relative; font-size: 0.95rem; line-height: 1.4; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: 0.3s; cursor: pointer; }
         .msg.sent { background: var(--msg-sent); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
         .msg.received { background: var(--msg-received); color: white; align-self: flex-start; border-bottom-left-radius: 4px; }
-        .msg:active { transform: scale(0.95); opacity: 0.8; } /* Click effect for delete */
+        .msg:active { transform: scale(0.95); opacity: 0.8; }
+        
+        /* IMAGE PREVIEW IN CHAT */
+        .chat-img { max-width: 100%; border-radius: 10px; margin-bottom: 5px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
 
         .tick { position: absolute; bottom: 5px; right: 10px; font-size: 0.8rem;}
         .tick-grey { color: var(--ticks); } 
         .tick-blue { color: var(--read-ticks); } 
 
-        #input-area { display: flex; padding: 15px; background: rgba(20, 20, 25, 0.95); width: 100%; border-top: 1px solid rgba(255,255,255,0.05); }
-        #msg-input { flex-grow: 1; border-radius: 25px; padding: 12px 20px; margin-right: 12px; border: none; background: rgba(255,255,255,0.1); color: white; outline:none; font-size: 1rem; }
-        #send-btn { background: var(--primary); color: black; border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+        #input-area { display: flex; align-items: center; padding: 12px; background: rgba(20, 20, 25, 0.95); width: 100%; border-top: 1px solid rgba(255,255,255,0.05); }
+        
+        /* ATTACH BUTTON */
+        #attach-btn { background: none; color: #aaa; border: none; font-size: 1.5rem; cursor: pointer; margin-right: 10px; transition: 0.2s; }
+        #attach-btn:hover { color: var(--primary); transform: scale(1.1); }
+        
+        #msg-input { flex-grow: 1; border-radius: 20px; padding: 12px 15px; margin-right: 10px; border: none; background: rgba(255,255,255,0.1); color: white; outline:none; font-size: 1rem; }
+        #send-btn { background: var(--primary); color: black; border: none; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.1rem; }
 
         /* PRO VIDEO CALL UI */
         #video-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 100; flex-direction: column; }
@@ -63,7 +71,6 @@
         #incoming-alert { display: none; background: #ff003c; color: white; padding: 15px; text-align: center; font-weight: bold; cursor: pointer; animation: blink 1s infinite; z-index: 110; position: absolute; width: 100%; top: 0; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
-        /* NEW: Custom Modals */
         .toast { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px; font-size: 0.85rem; z-index: 200; display: none; }
     </style>
 </head>
@@ -92,7 +99,7 @@
     </div>
 
     <div id="chat-screen" class="screen">
-        <div id="toast-msg" class="toast">Message Deleted</div>
+        <div id="toast-msg" class="toast">Action Complete</div>
         <div id="incoming-alert" onclick="answerCall()">📲 INCOMING VIDEO CALL! TAP TO ANSWER</div>
         <div class="header">
             <div style="display: flex; align-items: center;">
@@ -107,9 +114,12 @@
         </div>
         
         <div id="messages"></div>
-        <div style="text-align: center; font-size: 0.7rem; color: #888; margin-bottom: 5px;">Double tap a message to delete</div>
+        <div style="text-align: center; font-size: 0.7rem; color: #888; margin-bottom: 5px;">Double tap to delete message</div>
         
         <div id="input-area">
+            <input type="file" id="image-upload" accept="image/*" style="display: none;">
+            <button id="attach-btn" onclick="document.getElementById('image-upload').click()">📷</button>
+            
             <input type="text" id="msg-input" placeholder="Secure message...">
             <button id="send-btn" onclick="sendRealMsg()">➤</button>
         </div>
@@ -126,7 +136,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded, onChildRemoved, set, get, child, onValue, remove, update, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+        import { getDatabase, ref, push, onChildAdded, onChildRemoved, onChildChanged, set, get, child, onValue, remove, update, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCbJmwbTt7Ds1GVAbQnn0yJPl2STl1B5WM",
@@ -151,7 +161,6 @@
         let peerConnection;
         const servers = { iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] };
 
-        // 1. AUTH & PRESENCE
         window.authenticate = async function() {
             let user = document.getElementById('username').value.trim().toLowerCase();
             let pass = document.getElementById('password').value.trim();
@@ -174,8 +183,6 @@
         function login(user) {
             currentUser = user;
             myStatusRef = ref(db, `users/${currentUser}/status`);
-            
-            // Set presence
             set(myStatusRef, "Online");
             onDisconnect(myStatusRef).set("Offline");
 
@@ -188,7 +195,6 @@
             }, 500);
         }
 
-        // 2. CONTACTS
         window.addFriend = async function() {
             let friendId = document.getElementById('search-friend').value.trim().toLowerCase();
             if(friendId === currentUser) return alert("Cannot add yourself.");
@@ -208,12 +214,10 @@
                 
                 snapshot.forEach((childSnapshot) => {
                     let friendName = childSnapshot.key;
-                    // Check friend's online status
                     onValue(ref(db, `users/${friendName}/status`), (statusSnap) => {
                         let status = statusSnap.val() || "Offline";
                         let dotColor = status === "Online" ? "#00ffcc" : "#ff4757";
                         
-                        // Update UI element if it exists, else create
                         let card = document.getElementById(`card-${friendName}`);
                         if(!card) {
                             listDiv.innerHTML += `
@@ -232,7 +236,6 @@
             });
         }
 
-        // 3. CHAT, TYPING & DELETE LOGIC
         window.openPrivateChat = function(friendName) {
             targetUser = friendName;
             privateRoomId = [currentUser, targetUser].sort().join("_");
@@ -246,7 +249,6 @@
             document.getElementById('chat-avatar').innerText = targetUser.charAt(0).toUpperCase();
             document.getElementById('messages').innerHTML = ""; 
             
-            // Listen for Target's Status/Typing
             onValue(typingRef, (snap) => {
                 if(snap.val()) document.getElementById('chat-status').innerText = "Typing...";
                 else {
@@ -256,14 +258,12 @@
                 }
             });
 
-            // Load & Mark messages as Read
             get(messagesRef).then((snapshot) => {
                 snapshot.forEach((msgSnap) => {
                     if (msgSnap.val().sender !== currentUser) update(child(messagesRef, msgSnap.key), { read: true });
                 });
             });
 
-            // Realtime Message Add
             onChildAdded(messagesRef, (snapshot) => {
                 const data = snapshot.val();
                 const msgKey = snapshot.key;
@@ -274,27 +274,31 @@
 
                 let tickElement = (msgType === "sent") ? (data.read ? `<span class="tick tick-blue">✓✓</span>` : `<span class="tick tick-grey">✓</span>`) : '';
                 
-                // Add Delete Double Click functionality
+                // IMAGE CHECK LOGIC
+                let contentHTML = "";
+                if(data.imageUrl) {
+                    contentHTML = `<img src="${data.imageUrl}" class="chat-img" onclick="window.open('${data.imageUrl}')"/><br>`;
+                }
+                contentHTML += data.text || "";
+
                 let newMsg = document.createElement('div');
                 newMsg.id = "msg-" + msgKey;
                 newMsg.className = `msg ${msgType}`;
-                newMsg.innerHTML = `${data.text}${tickElement}`;
+                newMsg.innerHTML = `${contentHTML}${tickElement}`;
                 newMsg.ondblclick = () => deleteMessage(msgKey, data.sender);
                 
                 msgBox.appendChild(newMsg);
                 msgBox.scrollTop = msgBox.scrollHeight;
             });
 
-            // Update Blue Ticks dynamically
             onChildChanged(messagesRef, (snapshot) => {
                 let msgDiv = document.getElementById("msg-" + snapshot.key);
                 if(msgDiv && snapshot.val().read && snapshot.val().sender === currentUser) {
-                    msgDiv.querySelector('.tick').className = "tick tick-blue";
-                    msgDiv.querySelector('.tick').innerText = "✓✓";
+                    let tick = msgDiv.querySelector('.tick');
+                    if(tick) { tick.className = "tick tick-blue"; tick.innerText = "✓✓"; }
                 }
             });
 
-            // Realtime Message Delete Sync
             onChildRemoved(messagesRef, (snapshot) => {
                 let msgDiv = document.getElementById("msg-" + snapshot.key);
                 if(msgDiv) {
@@ -308,18 +312,18 @@
             listenForCalls();
         }
 
-        // Delete Logic
         window.deleteMessage = function(msgKey, sender) {
             if(sender === currentUser) {
                 if(confirm("Delete this message for everyone?")) {
                     remove(child(messagesRef, msgKey));
-                    showToast();
+                    showToast("Message Deleted");
                 }
             } else { alert("You can only delete your own messages!"); }
         }
 
-        function showToast() {
+        function showToast(text) {
             let toast = document.getElementById('toast-msg');
+            toast.innerText = text;
             toast.style.display = 'block';
             setTimeout(() => toast.style.display = 'none', 2000);
         }
@@ -330,13 +334,12 @@
             document.getElementById('contacts-screen').classList.add('active-screen', 'fade-in');
         }
 
-        // Send Msg & Typing Logic
         window.sendRealMsg = function() {
             let input = document.getElementById('msg-input');
             if(input.value.trim() !== "") {
                 push(messagesRef, { sender: currentUser, text: input.value, read: false }); 
                 input.value = '';
-                set(ref(db, `chats/${privateRoomId}/typing/${currentUser}`), false); // stop typing
+                set(ref(db, `chats/${privateRoomId}/typing/${currentUser}`), false);
             }
         }
         
@@ -349,7 +352,54 @@
         });
         document.getElementById("msg-input").addEventListener("keypress", (e) => { if(e.key === "Enter") window.sendRealMsg(); });
 
-        /* -- WEBRTC FUNCTIONS (REMAIN UNCHANGED) -- */
+        /* --- THE BASE64 IMAGE HACKER LOGIC --- */
+        document.getElementById('image-upload').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+            
+            showToast("Compressing Image...");
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    // Compress image using Canvas taaki Database hang na ho
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 500;
+                    const MAX_HEIGHT = 500;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    } else {
+                        if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Convert back to Base64 code (quality 50%)
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.5); 
+
+                    // Send to Firebase directly as Text
+                    push(messagesRef, {
+                        sender: currentUser,
+                        text: "📷 Image", // Chota text fallback ke liye
+                        imageUrl: compressedBase64, // Pura photo ka code
+                        read: false
+                    });
+                    
+                    showToast("Sent!");
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        });
+
+        /* -- WEBRTC FUNCTIONS -- */
         async function setupMedia() {
             document.getElementById('video-overlay').style.display = 'flex';
             localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacingMode }, audio: true });
