@@ -1,32 +1,31 @@
-<!DOCTYPE html>
+npm install firebase.<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecureChat // V1</title>
+    <title>SecureChat // V2</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #0f0f13; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; }
         
-        /* LOGIN SCREEN */
         #login-screen { background: #1c1c24; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 90%; max-width: 400px; text-align: center; }
         h2 { margin-bottom: 20px; color: #00ffcc; }
         input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; background: #2a2a35; color: white; outline: none; }
         .btn { width: 100%; padding: 12px; background: #00ffcc; color: black; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
         .btn:hover { background: #00e6b8; transform: scale(1.02); }
 
-        /* CHAT SCREEN (Hidden by default) */
         #chat-screen { display: none; width: 100%; max-width: 500px; height: 90vh; background: #1c1c24; border-radius: 15px; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         #chat-header { background: #2a2a35; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00ffcc; }
         .call-btn { background: #ff003c; color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; }
         
         #messages { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 10px 15px; border-radius: 15px; max-width: 75%; word-wrap: break-word; }
+        .msg { padding: 10px 15px; border-radius: 15px; max-width: 75%; word-wrap: break-word; position: relative; }
         .msg.sent { background: #00ffcc; color: black; align-self: flex-end; border-bottom-right-radius: 2px; }
         .msg.received { background: #2a2a35; color: white; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .sender-name { font-size: 0.65rem; opacity: 0.7; margin-bottom: 3px; display: block; font-weight: bold; }
 
         #input-area { display: flex; padding: 10px; background: #2a2a35; }
-        #msg-input { flex-grow: 1; border-radius: 20px; padding: 10px 15px; margin-right: 10px; }
+        #msg-input { flex-grow: 1; border-radius: 20px; padding: 10px 15px; margin-right: 10px; border: none; background: #1c1c24; color: white; outline:none; }
         #send-btn { background: #00ffcc; color: black; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.2rem; cursor: pointer; }
     </style>
 </head>
@@ -34,52 +33,94 @@
 
     <div id="login-screen">
         <h2>SecureChat 💬</h2>
-        <input type="text" id="username" placeholder="Enter Username">
-        <input type="password" id="password" placeholder="Enter Password">
-        <button class="btn" onclick="fakeLogin()">Enter Chat Room</button>
+        <input type="text" id="username" placeholder="Enter Your Name">
+        <button class="btn" onclick="startChat()">Enter Chat Room</button>
     </div>
 
     <div id="chat-screen">
         <div id="chat-header">
             <h3 id="user-display">Chat Room</h3>
-            <button class="call-btn">📞 Call</button>
+            <button class="call-btn" onclick="alert('Call feature coming in Phase 3!')">📞 Call</button>
         </div>
         
         <div id="messages">
-            <div class="msg received">Welcome to SecureChat! 🚀</div>
-            <div class="msg received">Emojis are supported: 🔥😂😎</div>
-        </div>
+            </div>
 
         <div id="input-area">
             <input type="text" id="msg-input" placeholder="Type a message (Emojis OK!)">
-            <button id="send-btn" onclick="sendFakeMsg()">➤</button>
+            <button id="send-btn" onclick="sendRealMsg()">➤</button>
         </div>
     </div>
 
-    <script>
-        // Yeh sirf UI test karne ke liye temporary logic hai
-        function fakeLogin() {
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+        // ⚠️ ADMIN WARNING: Yahan Apna Asli Firebase Config Paste Karna Hai 👇
+        const firebaseConfig = {
+            apiKey: "YAHAN_APNI_API_KEY_DALO",
+            authDomain: "chat-18904.firebaseapp.com",
+            databaseURL: "https://chat-18904-default-rtdb.firebaseio.com",
+            projectId: "chat-18904",
+            storageBucket: "chat-18904.appspot.com",
+            messagingSenderId: "833373288874",
+            appId: "YAHAN_APNA_APP_ID_DALO"
+        };
+        // 👆 -------------------------------------------------------------------
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const messagesRef = ref(db, "messages");
+
+        let currentUser = "";
+
+        // Login Logic
+        window.startChat = function() {
             let user = document.getElementById('username').value;
-            if(user.length > 2) {
+            if(user.trim().length > 2) {
+                currentUser = user;
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('chat-screen').style.display = 'flex';
-                document.getElementById('user-display').innerText = "Logged in as: " + user;
-            } else {
-                alert("Please enter a username!");
-            }
+                document.getElementById('user-display').innerText = currentUser + " (Online)";
+            } else { alert("Naam toh dalo bhai!"); }
         }
 
-        function sendFakeMsg() {
+        // Send Message to Cloud
+        window.sendRealMsg = function() {
             let input = document.getElementById('msg-input');
             let text = input.value;
             if(text.trim() !== "") {
-                let msgBox = document.getElementById('messages');
-                msgBox.innerHTML += `<div class="msg sent">${text}</div>`;
+                push(messagesRef, {
+                    sender: currentUser,
+                    text: text,
+                    timestamp: Date.now()
+                });
                 input.value = '';
-                msgBox.scrollTop = msgBox.scrollHeight; // Auto-scroll
             }
         }
+
+        // Enter key shortcut
+        document.getElementById("msg-input").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") { window.sendRealMsg(); }
+        });
+
+        // Receive Messages from Cloud (Real-time listener)
+        onChildAdded(messagesRef, (snapshot) => {
+            const data = snapshot.val();
+            const msgBox = document.getElementById('messages');
+            
+            // Check message kisne bheja
+            const msgType = (data.sender === currentUser) ? "sent" : "received";
+            
+            msgBox.innerHTML += `
+                <div class="msg ${msgType}">
+                    <span class="sender-name">${data.sender}</span>
+                    ${data.text}
+                </div>
+            `;
+            msgBox.scrollTop = msgBox.scrollHeight;
+        });
     </script>
 </body>
 </html>
-
