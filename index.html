@@ -4,69 +4,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecureChat // V4.2 (Perfect UI)</title>
+    <title>SecureChat // V5 (Private Edition)</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #0f0f13; color: white; display: flex; justify-content: center; align-items: center; height: 100dvh; overflow: hidden; }
         
-        #login-screen { background: #1c1c24; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 90%; max-width: 400px; text-align: center; z-index: 10; }
+        /* NEW: WhatsApp Style Emoji Background */
+        body { 
+            background-color: #0f0f13; 
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" opacity="0.04"><text x="20" y="40" font-size="25">💬</text><text x="80" y="90" font-size="25">🔥</text><text x="10" y="120" font-size="25">🚀</text><text x="100" y="30" font-size="25">😎</text></svg>');
+            color: white; display: flex; justify-content: center; align-items: center; height: 100dvh; overflow: hidden; 
+        }
+        
+        #login-screen { background: rgba(28, 28, 36, 0.95); padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); width: 90%; max-width: 400px; text-align: center; z-index: 10; border: 1px solid #333; }
         h2 { margin-bottom: 20px; color: #00ffcc; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; background: #2a2a35; color: white; outline: none; }
-        .btn { width: 100%; padding: 12px; background: #00ffcc; color: black; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        p.subtitle { font-size: 0.85rem; color: #aaa; margin-bottom: 15px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; background: #2a2a35; color: white; outline: none; font-size: 1rem; }
+        .btn { width: 100%; padding: 12px; background: #00ffcc; color: black; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; transition: 0.3s; font-size: 1.1rem; }
         .btn:hover { background: #00e6b8; transform: scale(1.02); }
 
-        #chat-screen { display: none; width: 100%; max-width: 500px; height: 100%; background: #1c1c24; flex-direction: column; position: relative; }
-        #chat-header { background: #2a2a35; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00ffcc; }
-        .call-btn { background: #00ffcc; color: black; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        #chat-screen { display: none; width: 100%; max-width: 500px; height: 100%; background: rgba(28, 28, 36, 0.85); backdrop-filter: blur(10px); flex-direction: column; position: relative; }
+        #chat-header { background: #1c1c24; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00ffcc; z-index: 10; }
+        .call-btn { background: #00ffcc; color: black; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; }
         
-        #messages { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 10px 15px; border-radius: 15px; max-width: 75%; word-wrap: break-word; position: relative; }
-        .msg.sent { background: #00ffcc; color: black; align-self: flex-end; border-bottom-right-radius: 2px; }
+        #messages { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; z-index: 5; }
+        .msg { padding: 10px 15px; border-radius: 15px; max-width: 75%; word-wrap: break-word; position: relative; font-size: 0.95rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .msg.sent { background: #005c4b; color: white; align-self: flex-end; border-bottom-right-radius: 2px; } /* WhatsApp Green */
         .msg.received { background: #2a2a35; color: white; align-self: flex-start; border-bottom-left-radius: 2px; }
-        .sender-name { font-size: 0.65rem; opacity: 0.7; margin-bottom: 3px; display: block; font-weight: bold; }
+        .sender-name { font-size: 0.65rem; opacity: 0.6; margin-bottom: 3px; display: block; font-weight: bold; }
+        .timestamp { font-size: 0.6rem; opacity: 0.5; float: right; margin-left: 10px; margin-top: 5px; }
 
-        #input-area { display: flex; padding: 10px; background: #2a2a35; width: 100%; z-index: 5; }
-        #msg-input { flex-grow: 1; border-radius: 20px; padding: 10px 15px; margin-right: 10px; border: none; background: #1c1c24; color: white; outline:none; }
-        #send-btn { background: #00ffcc; color: black; border: none; border-radius: 50%; width: 40px; height: 40px; min-width: 40px; font-size: 1.2rem; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+        #input-area { display: flex; padding: 10px; background: #1c1c24; width: 100%; z-index: 10; border-top: 1px solid #333; }
+        #msg-input { flex-grow: 1; border-radius: 20px; padding: 12px 15px; margin-right: 10px; border: none; background: #2a2a35; color: white; outline:none; }
+        #send-btn { background: #00ffcc; color: black; border: none; border-radius: 50%; width: 45px; height: 45px; min-width: 45px; font-size: 1.2rem; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
+        #send-btn:active { transform: scale(0.9); }
 
-        /* PRO VIDEO CALL UI */
+        /* VIDEO CALL UI */
         #video-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 100; flex-direction: column; }
         #remoteVideo { width: 100%; height: 100%; object-fit: cover; background: #111; }
-        
-        /* CHOTI SCREEN KO AUR UPAR KIYA (bottom: 150px) */
         #localVideo { width: 100px; height: 150px; position: absolute; bottom: 150px; right: 20px; object-fit: cover; border: 2px solid #00ffcc; border-radius: 10px; background: #333; z-index: 101; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         
-        /* END CALL BUTTON KO BHI UPAR KIYA (bottom: 80px) */
         #call-controls { position: absolute; bottom: 80px; width: 100%; display: flex; justify-content: center; z-index: 102; }
         .end-btn { padding: 15px 40px; border-radius: 30px; font-weight: bold; cursor: pointer; border: none; font-size: 1.1rem; background: #ff003c; color: white; box-shadow: 0 4px 15px rgba(255,0,60,0.5); transition: 0.2s; }
-        .end-btn:hover { background: #d40032; transform: scale(1.05); }
-
-        .flip-btn { position: absolute; top: 20px; right: 20px; z-index: 105; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); color: white; border: 2px solid white; border-radius: 50%; width: 50px; height: 50px; font-size: 1.2rem; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: 0.2s; }
-        .flip-btn:active { transform: rotate(180deg); }
         
-        #incoming-alert { display: none; background: #ff003c; color: white; padding: 15px; text-align: center; font-weight: bold; cursor: pointer; animation: blink 1s infinite; z-index: 110; position: absolute; width: 100%; top: 0; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .flip-btn { position: absolute; top: 20px; right: 20px; z-index: 105; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); color: white; border: 2px solid white; border-radius: 50%; width: 50px; height: 50px; font-size: 1.2rem; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        
+        #incoming-alert { display: none; background: #00ffcc; color: black; padding: 15px; text-align: center; font-weight: bold; cursor: pointer; animation: blink 1s infinite; z-index: 110; position: absolute; width: 100%; top: 0; box-shadow: 0 5px 15px rgba(0,255,204,0.4); }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
-        <h2>SecureChat V4.2 💬</h2>
-        <input type="text" id="username" placeholder="Enter Your Name">
-        <button class="btn" onclick="startChat()">Enter Secure Node</button>
+        <h2>SecureChat V5 🔒</h2>
+        <p class="subtitle">Private 1-on-1 End-to-End Chat</p>
+        <input type="text" id="username" placeholder="Your Name (e.g., Khushal)">
+        <input type="text" id="friendname" placeholder="Friend's Name (e.g., Sunil)">
+        <button class="btn" onclick="startChat()">Start Private Chat</button>
     </div>
 
     <div id="chat-screen">
         <div id="incoming-alert" onclick="answerCall()">📲 INCOMING CALL! TAP TO ANSWER</div>
         <div id="chat-header">
-            <h3 id="user-display">Chat Room</h3>
-            <button class="call-btn" onclick="startCall()">📹 Video Call</button>
+            <div>
+                <h3 id="user-display">Chat</h3>
+                <span style="font-size: 0.7rem; color: #00ffcc;">End-to-End Encrypted</span>
+            </div>
+            <button class="call-btn" onclick="startCall()">📹 Call</button>
         </div>
         
         <div id="messages"></div>
 
         <div id="input-area">
-            <input type="text" id="msg-input" placeholder="Type a message...">
+            <input type="text" id="msg-input" placeholder="Message to friend...">
             <button id="send-btn" onclick="sendRealMsg()">➤</button>
         </div>
 
@@ -96,10 +105,12 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const messagesRef = ref(db, "messages");
-        const callRef = ref(db, "call"); 
-
+        
         let currentUser = "";
+        let targetUser = "";
+        let privateRoomId = ""; // Ye naya private kamra hai
+        let messagesRef, callRef;
+
         let localStream;
         let peerConnection;
         let currentFacingMode = "user"; 
@@ -110,34 +121,62 @@
             ]
         };
 
+        // --- PRIVATE CHAT SETUP ---
         window.startChat = function() {
-            let user = document.getElementById('username').value;
-            if(user.trim().length > 2) {
+            let user = document.getElementById('username').value.trim();
+            let friend = document.getElementById('friendname').value.trim();
+            
+            if(user.length > 1 && friend.length > 1) {
                 currentUser = user;
+                targetUser = friend;
+                
+                // Alphabetical sort karke unique ID banana taaki dono ek hi room me aayein
+                privateRoomId = [currentUser.toLowerCase(), targetUser.toLowerCase()].sort().join("_");
+                
+                // Database paths update to Private Room
+                messagesRef = ref(db, "private_chats/" + privateRoomId + "/messages");
+                callRef = ref(db, "private_chats/" + privateRoomId + "/call");
+                
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('chat-screen').style.display = 'flex';
-                document.getElementById('user-display').innerText = currentUser;
+                document.getElementById('user-display').innerText = `Chatting with: ${targetUser}`;
+                
+                // Start listening ONLY for this private room
+                listenForMessages();
                 listenForCalls(); 
+            } else {
+                alert("Please enter both names correctly!");
             }
         }
 
         window.sendRealMsg = function() {
             let input = document.getElementById('msg-input');
             if(input.value.trim() !== "") {
-                push(messagesRef, { sender: currentUser, text: input.value });
+                let time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                push(messagesRef, { sender: currentUser, text: input.value, time: time });
                 input.value = '';
             }
         }
         document.getElementById("msg-input").addEventListener("keypress", (e) => { if(e.key === "Enter") window.sendRealMsg(); });
 
-        onChildAdded(messagesRef, (snapshot) => {
-            const data = snapshot.val();
-            const msgBox = document.getElementById('messages');
-            const msgType = (data.sender === currentUser) ? "sent" : "received";
-            msgBox.innerHTML += `<div class="msg ${msgType}"><span class="sender-name">${data.sender}</span>${data.text}</div>`;
-            msgBox.scrollTop = msgBox.scrollHeight;
-        });
+        function listenForMessages() {
+            onChildAdded(messagesRef, (snapshot) => {
+                const data = snapshot.val();
+                const msgBox = document.getElementById('messages');
+                const msgType = (data.sender === currentUser) ? "sent" : "received";
+                
+                msgBox.innerHTML += `
+                    <div class="msg ${msgType}">
+                        <span class="sender-name">${data.sender}</span>
+                        ${data.text}
+                        <span class="timestamp">${data.time || ''}</span>
+                    </div>
+                `;
+                msgBox.scrollTop = msgBox.scrollHeight;
+            });
+        }
 
+        // --- VIDEO CALL LOGIC (NOW PRIVATE) ---
         async function setupMedia() {
             document.getElementById('video-overlay').style.display = 'flex';
             currentFacingMode = "user"; 
@@ -156,52 +195,45 @@
             if (!localStream) return;
             currentFacingMode = (currentFacingMode === "user") ? "environment" : "user";
             localStream.getVideoTracks().forEach(track => track.stop());
-            
             const newStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacingMode } });
             const newVideoTrack = newStream.getVideoTracks()[0];
-            
             localStream.removeTrack(localStream.getVideoTracks()[0]);
             localStream.addTrack(newVideoTrack);
             document.getElementById('localVideo').srcObject = localStream;
-            
             if (peerConnection) {
                 const sender = peerConnection.getSenders().find(s => s.track.kind === 'video');
-                if (sender) {
-                    sender.replaceTrack(newVideoTrack);
-                }
+                if (sender) sender.replaceTrack(newVideoTrack);
             }
         }
 
         window.startCall = async function() {
             await setupMedia();
             peerConnection.onicecandidate = event => {
-                if(event.candidate) set(ref(db, "call/offerCandidate"), JSON.stringify(event.candidate));
+                if(event.candidate) set(ref(db, `private_chats/${privateRoomId}/call/offerCandidate`), JSON.stringify(event.candidate));
             };
             const offer = await peerConnection.createOffer();
             await peerConnection.setLocalDescription(offer);
-            set(ref(db, "call/offer"), JSON.stringify({ type: offer.type, sdp: offer.sdp, caller: currentUser }));
+            set(ref(db, `private_chats/${privateRoomId}/call/offer`), JSON.stringify({ type: offer.type, sdp: offer.sdp, caller: currentUser }));
 
-            onValue(ref(db, "call/answer"), (snapshot) => {
+            onValue(ref(db, `private_chats/${privateRoomId}/call/answer`), (snapshot) => {
                 const data = snapshot.val();
-                if(data && !peerConnection.currentRemoteDescription) {
-                    peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(data)));
-                }
+                if(data && !peerConnection.currentRemoteDescription) peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(data)));
             });
 
-            onValue(ref(db, "call/answerCandidate"), (snapshot) => {
+            onValue(ref(db, `private_chats/${privateRoomId}/call/answerCandidate`), (snapshot) => {
                 const data = snapshot.val();
                 if(data) peerConnection.addIceCandidate(new RTCIceCandidate(JSON.parse(data)));
             });
         }
 
         function listenForCalls() {
-            onValue(ref(db, "call/offer"), (snapshot) => {
+            onValue(ref(db, `private_chats/${privateRoomId}/call/offer`), (snapshot) => {
                 const data = snapshot.val();
                 if(data) {
                     let offerObj = JSON.parse(data);
                     if(offerObj.caller !== currentUser) {
                         document.getElementById('incoming-alert').style.display = 'block';
-                        document.getElementById('incoming-alert').innerText = `📲 INCOMING CALL FROM ${offerObj.caller}! TAP TO ANSWER`;
+                        document.getElementById('incoming-alert').innerText = `📲 CALL FROM ${offerObj.caller.toUpperCase()}! TAP HERE`;
                     }
                 } else {
                     document.getElementById('incoming-alert').style.display = 'none';
@@ -215,20 +247,20 @@
             await setupMedia();
 
             peerConnection.onicecandidate = event => {
-                if(event.candidate) set(ref(db, "call/answerCandidate"), JSON.stringify(event.candidate));
+                if(event.candidate) set(ref(db, `private_chats/${privateRoomId}/call/answerCandidate`), JSON.stringify(event.candidate));
             };
 
-            onValue(ref(db, "call/offer"), async (snapshot) => {
+            onValue(ref(db, `private_chats/${privateRoomId}/call/offer`), async (snapshot) => {
                 const data = snapshot.val();
                 if(data) {
                     await peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(data)));
                     const answer = await peerConnection.createAnswer();
                     await peerConnection.setLocalDescription(answer);
-                    set(ref(db, "call/answer"), JSON.stringify({ type: answer.type, sdp: answer.sdp }));
+                    set(ref(db, `private_chats/${privateRoomId}/call/answer`), JSON.stringify({ type: answer.type, sdp: answer.sdp }));
                 }
             }, { onlyOnce: true });
 
-            onValue(ref(db, "call/offerCandidate"), (snapshot) => {
+            onValue(ref(db, `private_chats/${privateRoomId}/call/offerCandidate`), (snapshot) => {
                 const data = snapshot.val();
                 if(data) peerConnection.addIceCandidate(new RTCIceCandidate(JSON.parse(data)));
             });
