@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SecureChat // V17 (Voice & React)</title>
+    <title>SecureChat // V17.2 (Bug Smasher)</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
@@ -62,10 +62,8 @@
         .tick { position: absolute; bottom: 4px; right: 8px; font-size: 0.7rem;}
         .tick-blue { color: #3498db; } 
 
-        /* REACTIONS BADGE */
         .reaction-badge { position: absolute; bottom: -10px; right: 10px; background: #333; border-radius: 12px; padding: 2px 6px; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.5); display: flex; gap: 3px; z-index: 2;}
 
-        /* TYPING ANIMATION */
         .typing-indicator { display: flex; gap: 4px; align-items: center; padding: 4px; }
         .typing-indicator span { width: 6px; height: 6px; background: var(--primary); border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
         .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
@@ -83,7 +81,6 @@
 
         .toast { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); background: var(--primary); color: black; font-weight: bold; padding: 10px 20px; border-radius: 20px; font-size: 0.9rem; z-index: 200; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         
-        /* MSG OPTIONS MODAL (For React & Delete) */
         #msg-options-modal { display: none; position: absolute; bottom: 0; width: 100%; background: var(--header-bg); border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 20px; z-index: 300; flex-direction: column; gap: 15px; box-shadow: 0 -5px 15px rgba(0,0,0,0.5); }
         .emoji-bar { display: flex; justify-content: space-around; font-size: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
         .emoji-bar span { cursor: pointer; transition: 0.2s; }
@@ -135,7 +132,7 @@
             <h2 class="brand">SecureChat</h2>
             <input type="text" id="username" placeholder="Username (e.g. Khushal)">
             <input type="password" id="password" placeholder="Password">
-            <button class="btn" onclick="authenticate()">Sign In</button>
+            <button class="btn" id="login-btn" onclick="authenticate()">Sign In</button>
             <p id="login-error" style="color: #ff4757; margin-top: 15px; font-size: 0.85rem; display: none;"></p>
         </div>
     </div>
@@ -245,18 +242,39 @@
         let localStream; let peerConnection; let isAudioOnlyCall = false; let isMuted = false; let isCamOff = false;
         const servers = { iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] };
 
-        // VOICE NOTES VARIABLES
         let mediaRecorder; let audioChunks = []; let isRecording = false;
 
-        // AUTH
+        // 🌟 UPDATED AUTHENTICATE WITH DEBUGGER 🌟
         window.authenticate = async function() {
+            let btn = document.getElementById('login-btn');
+            btn.innerText = "Checking..."; // UI changes instantly
+            
             let user = document.getElementById('username').value.trim().toLowerCase();
             let pass = document.getElementById('password').value.trim();
-            if(user.length < 3) return alert("Fill details correctly!");
+            
+            if(user.length < 3) { 
+                alert("Fill details correctly!"); 
+                btn.innerText = "Sign In";
+                return; 
+            }
+            
             get(child(ref(db), `users/${user}`)).then((snapshot) => {
-                if (snapshot.exists() && snapshot.val().password === pass) { login(user); } 
-                else if (!snapshot.exists()) { set(ref(db, 'users/' + user), { password: pass, bio: "Hey there! I am using SecureChat." }); login(user); } 
-                else { document.getElementById('login-error').innerText = "Incorrect password"; document.getElementById('login-error').style.display = "block"; }
+                if (snapshot.exists() && snapshot.val().password === pass) { 
+                    login(user); 
+                } 
+                else if (!snapshot.exists()) { 
+                    set(ref(db, 'users/' + user), { password: pass, bio: "Hey there! I am using SecureChat." }); 
+                    login(user); 
+                } 
+                else { 
+                    document.getElementById('login-error').innerText = "Incorrect password"; 
+                    document.getElementById('login-error').style.display = "block"; 
+                    btn.innerText = "Sign In"; 
+                }
+            }).catch(error => {
+                // BUG DETECTOR
+                alert("Server Error! Check Internet connection.\nDetails: " + error.message);
+                btn.innerText = "Sign In"; 
             });
         }
 
@@ -267,7 +285,7 @@
             setTimeout(() => { document.getElementById('login-screen').style.display = 'none'; document.getElementById('contacts-screen').classList.add('active-screen', 'fade-in'); loadDashboard(); }, 300);
         }
 
-        // INPUT LOGIC (TOGGLE MIC AND SEND BTN)
+        // INPUT LOGIC
         document.getElementById("msg-input").addEventListener("input", () => {
             let val = document.getElementById("msg-input").value.trim();
             document.getElementById("mic-btn").style.display = val ? "none" : "block";
@@ -280,7 +298,7 @@
             }
         });
 
-        // 🌟 VOICE NOTES LOGIC 🌟
+        // VOICE NOTES
         window.toggleRecording = async function() {
             let micBtn = document.getElementById("mic-btn");
             if(!isRecording) {
@@ -298,10 +316,7 @@
                     mediaRecorder.onstop = () => {
                         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
                         const reader = new FileReader();
-                        reader.onloadend = () => {
-                            // Send base64 Audio
-                            push(messagesRef, { sender: currentUser, text: "", audioUrl: reader.result, read: false, timestamp: Date.now() });
-                        };
+                        reader.onloadend = () => { push(messagesRef, { sender: currentUser, text: "", audioUrl: reader.result, read: false, timestamp: Date.now() }); };
                         reader.readAsDataURL(audioBlob);
                         audioChunks = [];
                     };
@@ -350,13 +365,9 @@
                 privateRoomId = [currentUser, targetUser].sort().join("_"); messagesRef = ref(db, "chats/" + privateRoomId + "/messages"); callRef = ref(db, "chats/" + privateRoomId + "/call"); typingRef = ref(db, "chats/" + privateRoomId + "/typing/" + targetUser);
                 get(child(ref(db), `users/${targetUser}/dpUrl`)).then((snap) => { let dpUrl = snap.val(); document.getElementById('chat-avatar').innerHTML = dpUrl ? `<img src="${dpUrl}" style="width:100%; height:100%; object-fit:cover;">` : targetUser.charAt(0).toUpperCase(); });
                 
-                // 🌟 ANIMATED TYPING INDICATOR 🌟
                 onValue(typingRef, (snap) => { 
-                    if(snap.val()) {
-                        document.getElementById('chat-status').innerHTML = `<div class="typing-indicator">typing<span></span><span></span><span></span></div>`;
-                    } else { 
-                        get(child(ref(db), `users/${targetUser}/status`)).then(s => { document.getElementById('chat-status').innerText = s.val() || "Offline"; }); 
-                    }
+                    if(snap.val()) { document.getElementById('chat-status').innerHTML = `<div class="typing-indicator">typing<span></span><span></span><span></span></div>`; } 
+                    else { get(child(ref(db), `users/${targetUser}/status`)).then(s => { document.getElementById('chat-status').innerText = s.val() || "Offline"; }); }
                 });
                 
                 get(messagesRef).then((snapshot) => { snapshot.forEach((msgSnap) => { if (msgSnap.val().sender !== currentUser) update(child(messagesRef, msgSnap.key), { read: true }); }); });
@@ -375,19 +386,15 @@
                 let contentHTML = "";
                 if(chatType === 'group' && msgType === 'received') { contentHTML += `<span class="sender-name">${data.sender}</span>`; }
                 
-                // Audio rendering
                 if(data.audioUrl) { contentHTML += `<audio controls style="max-width:200px; height:35px; outline:none;"><source src="${data.audioUrl}" type="audio/webm"></audio><br>`; }
                 if(data.imageUrl) { contentHTML += `<img src="${data.imageUrl}" class="chat-img" onclick="window.open('${data.imageUrl}')"/><br>`; }
                 contentHTML += data.text || "";
 
-                // Reactions rendering
                 let reactionHTML = data.reaction ? `<div class="reaction-badge">${data.reaction}</div>` : '';
 
                 let newMsg = document.createElement('div');
                 newMsg.id = "msg-" + msgKey; newMsg.className = `msg ${msgType}`;
                 newMsg.innerHTML = `${contentHTML} <span class="tick" style="right: ${msgType==='sent' ? '25px':'8px'}">${timeStr}</span> ${tickElement} ${reactionHTML}`;
-                
-                // 🌟 MESSAGE OPTIONS TRIGGER (CLICK TO REACT/DELETE) 🌟
                 newMsg.onclick = () => openMsgOptions(msgKey, data.sender);
                 
                 msgBox.appendChild(newMsg); msgBox.scrollTop = msgBox.scrollHeight;
@@ -397,39 +404,21 @@
                 let msgDiv = document.getElementById("msg-" + snapshot.key);
                 if(msgDiv) {
                     const data = snapshot.val();
-                    // Update ticks
                     if(chatType === 'private' && data.read && data.sender === currentUser) { let tick = msgDiv.querySelector('.tick-grey'); if(tick) { tick.className = "tick tick-blue"; tick.innerText = "✓✓"; } }
-                    // Update reactions dynamically
                     let existingBadge = msgDiv.querySelector('.reaction-badge');
-                    if(data.reaction) {
-                        if(existingBadge) { existingBadge.innerText = data.reaction; } 
-                        else { msgDiv.innerHTML += `<div class="reaction-badge">${data.reaction}</div>`; }
-                    } else if(existingBadge) { existingBadge.remove(); }
+                    if(data.reaction) { if(existingBadge) { existingBadge.innerText = data.reaction; } else { msgDiv.innerHTML += `<div class="reaction-badge">${data.reaction}</div>`; } } 
+                    else if(existingBadge) { existingBadge.remove(); }
                 }
             });
 
             onChildRemoved(messagesRef, (snapshot) => { let msgDiv = document.getElementById("msg-" + snapshot.key); if(msgDiv) { msgDiv.innerHTML = `<span style="color:var(--muted); font-style:italic;">🚫 Deleted</span>`; setTimeout(() => msgDiv.remove(), 2000); } });
         }
 
-        // 🌟 MESSAGE OPTIONS & EMOJI REACTIONS 🌟
-        window.openMsgOptions = function(key, sender) {
-            selectedMsgKey = key; selectedMsgSender = sender;
-            document.getElementById('msg-options-modal').style.display = 'flex';
-        }
+        // MESSAGE OPTIONS & EMOJI
+        window.openMsgOptions = function(key, sender) { selectedMsgKey = key; selectedMsgSender = sender; document.getElementById('msg-options-modal').style.display = 'flex'; }
         window.closeMsgOptions = function() { document.getElementById('msg-options-modal').style.display = 'none'; selectedMsgKey = null; }
-
-        window.sendReaction = function(emoji) {
-            if(selectedMsgKey) {
-                update(child(messagesRef, selectedMsgKey), { reaction: emoji });
-                closeMsgOptions();
-            }
-        }
-
-        window.deleteSelectedMsg = function() {
-            if(selectedMsgSender === currentUser) {
-                if(confirm("Delete message for everyone?")) { remove(child(messagesRef, selectedMsgKey)); showToast("Deleted"); closeMsgOptions(); }
-            } else { alert("You can only delete your own messages!"); closeMsgOptions(); }
-        }
+        window.sendReaction = function(emoji) { if(selectedMsgKey) { update(child(messagesRef, selectedMsgKey), { reaction: emoji }); closeMsgOptions(); } }
+        window.deleteSelectedMsg = function() { if(selectedMsgSender === currentUser) { if(confirm("Delete message for everyone?")) { remove(child(messagesRef, selectedMsgKey)); showToast("Deleted"); closeMsgOptions(); } } else { alert("You can only delete your own messages!"); closeMsgOptions(); } }
 
         function showToast(text) { let t = document.getElementById('toast-msg'); t.innerText = text; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2000); }
         window.goBackToContacts = function() { targetUser = ""; document.getElementById('chat-screen').classList.remove('active-screen'); document.getElementById('contacts-screen').classList.add('active-screen', 'fade-in'); }
@@ -438,9 +427,7 @@
             let input = document.getElementById('msg-input');
             if(input.value.trim() !== "") {
                 push(messagesRef, { sender: currentUser, text: input.value, read: false, timestamp: Date.now() }); 
-                input.value = '';
-                document.getElementById("mic-btn").style.display = "block";
-                document.getElementById("send-btn").style.display = "none";
+                input.value = ''; document.getElementById("mic-btn").style.display = "block"; document.getElementById("send-btn").style.display = "none";
                 if(chatType === 'private') set(ref(db, `chats/${privateRoomId}/typing/${currentUser}`), false);
             }
         }
