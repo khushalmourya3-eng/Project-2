@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#00ffcc">
-    <title>SecureChat // V20 (Docs & HD Photos)</title>
+    <title>SecureChat // V21 (Call Logs & Nav)</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
@@ -28,7 +28,7 @@
         .active-screen { display: flex; animation: slideSmooth 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; }
         @keyframes slideSmooth { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-        .app-header { background: var(--header-bg); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; color: var(--primary); z-index: 10; height: 60px; border-bottom: 1px solid rgba(0,255,204,0.1); }
+        .app-header { background: var(--header-bg); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; color: var(--primary); z-index: 10; height: 60px; border-bottom: 1px solid rgba(0,255,204,0.1); flex-shrink: 0;}
         .app-header h3 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.5px; }
         .header-icons { display: flex; gap: 20px; align-items: center; color: var(--primary); font-size: 1.3rem; cursor: pointer; }
         
@@ -41,7 +41,7 @@
         .btn:hover { background: #00e6b8; transform: scale(0.98); }
 
         /* STATUS BAR */
-        .status-container { display: flex; gap: 15px; padding: 15px 10px; overflow-x: auto; background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .status-container { display: flex; gap: 15px; padding: 15px 10px; overflow-x: auto; background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; }
         .status-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; min-width: 65px; }
         .status-add-btn { width: 55px; height: 55px; border-radius: 50%; border: 2px dashed var(--primary); display: flex; justify-content: center; align-items: center; font-size: 1.8rem; background: rgba(0,255,204,0.1); color: var(--primary); transition: 0.2s; }
         .status-add-btn:active { transform: scale(0.9); }
@@ -49,19 +49,28 @@
         .status-circle img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
         .status-name { font-size: 0.75rem; margin-top: 6px; color: white; text-transform: capitalize; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 65px; text-align: center; }
 
-        /* FULL SCREEN STATUS VIEWER */
         #status-viewer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 1000; flex-direction: column; justify-content: center; align-items: center; }
         #status-progress-bar { position: absolute; top: 0; left: 0; height: 3px; background: var(--primary); width: 0%; transition: width 0.1s linear; z-index: 1001; }
         .status-viewer-header { position: absolute; top: 10px; left: 0; width: 100%; display: flex; justify-content: space-between; padding: 10px 20px; z-index: 1001; background: linear-gradient(rgba(0,0,0,0.8), transparent); }
         
-        #contacts-list { flex-grow: 1; overflow-y: auto; padding: 10px 0; }
+        /* 🌟 MAIN APP TABS & LISTS 🌟 */
+        #chats-tab-content, #calls-tab-content { display: flex; flex-direction: column; flex-grow: 1; overflow: hidden; }
+        #contacts-list, #calls-list { flex-grow: 1; overflow-y: auto; padding: 10px 0; }
+        
         .wa-chat-card { display: flex; align-items: center; padding: 0 15px; cursor: pointer; transition: background 0.2s; margin-bottom: 5px; }
         .wa-chat-card:hover { background: rgba(255,255,255,0.05); }
         .wa-avatar { width: 50px; height: 50px; background: var(--primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: black; font-weight: bold; font-size: 1.2rem; overflow: hidden; margin-right: 15px; flex-shrink: 0; }
         .wa-chat-info { flex-grow: 1; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
         .wa-chat-header { display: flex; justify-content: space-between; margin-bottom: 3px; }
         .wa-chat-header h4 { font-size: 1.1rem; font-weight: 500; color: white; text-transform: capitalize; }
-        .fab { position: absolute; bottom: 25px; right: 25px; width: 55px; height: 55px; background: var(--primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(0,255,204,0.4); cursor: pointer; z-index: 20; color: black; font-size: 1.5rem; transition: 0.2s;}
+        
+        .fab { position: absolute; bottom: 85px; right: 25px; width: 55px; height: 55px; background: var(--primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(0,255,204,0.4); cursor: pointer; z-index: 20; color: black; font-size: 1.5rem; transition: 0.2s;}
+
+        /* 🌟 NEW BOTTOM NAVIGATION BAR 🌟 */
+        .bottom-nav { display: flex; justify-content: space-around; background: var(--header-bg); padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; z-index: 10;}
+        .nav-item { color: var(--muted); font-size: 0.85rem; font-weight: bold; cursor: pointer; display:flex; flex-direction:column; align-items:center; gap:4px; width:50%; text-align:center; transition: 0.2s;}
+        .nav-item.active { color: var(--primary); }
+        .nav-item span { font-size: 1.3rem; }
 
         .wa-modal { display: none; position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(15, 20, 25, 0.98); z-index: 50; flex-direction: column; }
         .modal-body { padding: 20px; }
@@ -70,7 +79,6 @@
         .msg { padding: 8px 12px; border-radius: 12px; max-width: 85%; word-wrap: break-word; position: relative; font-size: 0.95rem; line-height: 1.3; box-shadow: 0 2px 5px rgba(0,0,0,0.3); padding-bottom: 20px; cursor: pointer;}
         .msg.sent { background: var(--msg-sent); color: white; align-self: flex-end; border-top-right-radius: 0; }
         .msg.received { background: var(--msg-received); color: white; align-self: flex-start; border-top-left-radius: 0; border: 1px solid rgba(255,255,255,0.05); }
-        .msg:active { transform: scale(0.98); opacity: 0.9; }
         
         .quoted-msg { background: rgba(0,0,0,0.2); border-left: 4px solid var(--primary); padding: 5px 10px; border-radius: 5px; margin-bottom: 5px; font-size: 0.85rem; color: #ddd; }
         .quoted-sender { color: var(--primary); font-weight: bold; margin-bottom: 2px; display: block; text-transform: capitalize; }
@@ -78,14 +86,9 @@
         .reply-preview-box .close-btn { position: absolute; right: 10px; top: 5px; cursor: pointer; color: #ff4757; font-weight: bold; font-size: 1.2rem; }
 
         .sender-name { font-size: 0.75rem; color: var(--primary); font-weight: bold; margin-bottom: 4px; display: block; text-transform: capitalize; }
-        
-        /* 🌟 NEW CHAT IMG STYLES 🌟 */
         .chat-img { max-width: 100%; border-radius: 8px; margin-bottom: 5px; border: 1px solid rgba(255,255,255,0.1); cursor: zoom-in; }
-        
-        /* 🌟 NEW DOCUMENT LINK STYLES 🌟 */
         .doc-link { display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px; color: var(--text-main); text-decoration: none; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 5px; word-break: break-all; }
-        .doc-link:hover { background: rgba(0,255,204,0.1); border-color: var(--primary); }
-
+        
         .tick { position: absolute; bottom: 4px; right: 8px; font-size: 0.7rem;}
         .tick-blue { color: #3498db; } 
 
@@ -96,10 +99,8 @@
         .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
         @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
 
-        /* 🌟 ATTACHMENT MENU 🌟 */
         #attach-menu { display: none; position: absolute; bottom: 65px; left: 10px; background: var(--header-bg); padding: 15px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1); flex-direction: column; gap: 15px; z-index: 50; }
         .attach-opt { display: flex; align-items: center; gap: 15px; color: white; font-weight: bold; cursor: pointer; padding: 5px; transition: 0.2s; }
-        .attach-opt:hover { color: var(--primary); }
         .attach-icon { background: rgba(255,255,255,0.1); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; }
 
         #input-area { display: flex; align-items: center; padding: 10px; background: var(--header-bg); gap: 10px; border-top: 1px solid rgba(255,255,255,0.05); position: relative; }
@@ -108,7 +109,6 @@
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
         
         #msg-input { flex-grow: 1; border-radius: 20px; padding: 12px 15px; border: none; background: rgba(255,255,255,0.1); color: white; outline:none; margin: 0; transition: 0.2s;}
-        #msg-input:focus { background: rgba(255,255,255,0.15); }
         #send-btn { background: var(--primary); color: black; border: none; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; flex-shrink: 0; }
 
         .toast { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); background: var(--primary); color: black; font-weight: bold; padding: 10px 20px; border-radius: 20px; font-size: 0.9rem; z-index: 200; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
@@ -116,7 +116,6 @@
         #msg-options-modal { display: none; position: absolute; bottom: 0; width: 100%; background: var(--header-bg); border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 20px; z-index: 300; flex-direction: column; gap: 15px; box-shadow: 0 -5px 15px rgba(0,0,0,0.5); }
         .emoji-bar { display: flex; justify-content: space-around; font-size: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
         .emoji-bar span { cursor: pointer; transition: 0.2s; }
-        .emoji-bar span:hover { transform: scale(1.3); }
         .action-opt { color: white; text-align: center; font-size: 1.1rem; font-weight: bold; cursor: pointer; padding: 10px; }
         .delete-opt { color: #ff4757; }
 
@@ -124,7 +123,6 @@
         .crop-container { width: 90%; max-width: 400px; height: 350px; background: #111; border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
         .crop-container img { display: block; max-width: 100%; }
         
-        /* 🌟 NEW: IN-APP PHOTO VIEWER 🌟 */
         #photo-viewer-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; flex-direction: column; }
         #photo-viewer-img { max-width: 95%; max-height: 85%; object-fit: contain; border-radius: 8px; }
         .close-photo-viewer { position: absolute; top: 20px; right: 20px; color: white; font-size: 2.5rem; cursor: pointer; text-shadow: 0 2px 5px black; }
@@ -191,17 +189,34 @@
             <div class="header-icons"><span onclick="openProfile()" style="font-size: 1.1rem;">⚙️ Settings</span></div>
         </div>
         
-        <div class="status-container">
-            <div class="status-item" onclick="document.getElementById('status-upload').click()">
-                <div class="status-add-btn">+</div>
-                <span class="status-name" style="color:var(--primary);">My Status</span>
+        <div id="chats-tab-content">
+            <div class="status-container">
+                <div class="status-item" onclick="document.getElementById('status-upload').click()">
+                    <div class="status-add-btn">+</div>
+                    <span class="status-name" style="color:var(--primary);">My Status</span>
+                </div>
+                <input type="file" id="status-upload" accept="image/*" style="display:none;" onchange="uploadStatusFile(event)">
+                <div id="friends-statuses-list" style="display:flex; gap:15px;"></div>
             </div>
-            <input type="file" id="status-upload" accept="image/*" style="display:none;" onchange="uploadStatusFile(event)">
-            <div id="friends-statuses-list" style="display:flex; gap:15px;"></div>
+            <div id="contacts-list"></div>
         </div>
 
-        <div id="contacts-list"></div>
-        <div class="fab" onclick="openAddModal()">💬</div>
+        <div id="calls-tab-content" style="display:none;">
+            <div id="calls-list">
+                <div style="text-align:center; color:var(--muted); margin-top:20px;">No recent calls.</div>
+            </div>
+        </div>
+
+        <div class="fab" id="main-fab" onclick="openAddModal()">💬</div>
+
+        <div class="bottom-nav">
+            <div class="nav-item active" id="nav-chats" onclick="switchTab('chats')">
+                <span>💬</span> Chats
+            </div>
+            <div class="nav-item" id="nav-calls" onclick="switchTab('calls')">
+                <span>📞</span> Calls
+            </div>
+        </div>
     </div>
 
     <div id="add-modal" class="wa-modal">
@@ -272,17 +287,11 @@
 
         <div id="input-area">
             <div id="attach-menu">
-                <div class="attach-opt" onclick="document.getElementById('image-upload').click(); toggleAttachMenu();">
-                    <div class="attach-icon" style="color: #3498db;">📷</div> Send Photo
-                </div>
-                <div class="attach-opt" onclick="document.getElementById('doc-upload').click(); toggleAttachMenu();">
-                    <div class="attach-icon" style="color: #9b59b6;">📄</div> Send Document (PDF/Doc)
-                </div>
+                <div class="attach-opt" onclick="document.getElementById('image-upload').click(); toggleAttachMenu();"><div class="attach-icon" style="color: #3498db;">📷</div> Send Photo</div>
+                <div class="attach-opt" onclick="document.getElementById('doc-upload').click(); toggleAttachMenu();"><div class="attach-icon" style="color: #9b59b6;">📄</div> Send Document</div>
             </div>
-
             <input type="file" id="image-upload" accept="image/*" style="display: none;">
             <input type="file" id="doc-upload" accept=".pdf,.doc,.docx,.txt" style="display: none;">
-            
             <button id="attach-btn" onclick="toggleAttachMenu()">📎</button>
             <input type="text" id="msg-input" placeholder="Message...">
             <button id="mic-btn" onclick="toggleRecording()">🎙️</button>
@@ -319,6 +328,7 @@
         const servers = { iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] };
         let mediaRecorder; let audioChunks = []; let isRecording = false;
 
+        // AUTHENTICATE
         document.getElementById('login-btn').addEventListener('click', async function() {
             let btn = this; btn.innerText = "Connecting...";
             let user = document.getElementById('username').value.trim().toLowerCase();
@@ -337,7 +347,68 @@
             myStatusRef = ref(db, `users/${currentUser}/status`); myLastSeenRef = ref(db, `users/${currentUser}/lastSeen`);
             set(myStatusRef, "Online"); onDisconnect(myStatusRef).set("Offline"); onDisconnect(myLastSeenRef).set(serverTimestamp());
             document.getElementById('login-screen').classList.remove('active-screen');
-            setTimeout(() => { document.getElementById('contacts-screen').classList.add('active-screen'); loadDashboard(); loadStatuses(); }, 50);
+            setTimeout(() => { 
+                document.getElementById('contacts-screen').classList.add('active-screen'); 
+                loadDashboard(); 
+                loadStatuses(); 
+                loadCallHistory(); // 🌟 LOAD CALL LOGS 🌟
+            }, 50);
+        }
+
+        // 🌟 BOTTOM NAV TAB SWITCHER 🌟
+        window.switchTab = function(tabName) {
+            if(tabName === 'chats') {
+                document.getElementById('chats-tab-content').style.display = 'flex';
+                document.getElementById('calls-tab-content').style.display = 'none';
+                document.getElementById('nav-chats').classList.add('active');
+                document.getElementById('nav-calls').classList.remove('active');
+                document.getElementById('main-fab').style.display = 'flex';
+            } else {
+                document.getElementById('chats-tab-content').style.display = 'none';
+                document.getElementById('calls-tab-content').style.display = 'flex';
+                document.getElementById('nav-chats').classList.remove('active');
+                document.getElementById('nav-calls').classList.add('active');
+                document.getElementById('main-fab').style.display = 'none';
+            }
+        }
+
+        // 🌟 CALL HISTORY LOGIC 🌟
+        function logCall(target, callType, direction) {
+            push(ref(db, `users/${currentUser}/call_history`), {
+                target: target,
+                callType: callType,
+                direction: direction,
+                timestamp: Date.now()
+            });
+        }
+
+        function loadCallHistory() {
+            onValue(ref(db, `users/${currentUser}/call_history`), (snapshot) => {
+                let div = document.getElementById('calls-list');
+                div.innerHTML = "";
+                if(snapshot.exists()) {
+                    let calls = [];
+                    snapshot.forEach(snap => { calls.push(snap.val()); });
+                    calls.reverse(); // Show newest first
+                    calls.forEach(data => {
+                        let icon = data.callType === 'video' ? '📹' : '📞';
+                        let dirIcon = data.direction === 'incoming' ? '↙️' : '↗️';
+                        let dirColor = data.direction === 'incoming' ? '#ff4757' : '#00ffcc'; // Red for incoming, Green for outgoing
+                        let timeStr = new Date(data.timestamp).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true, day: 'numeric', month: 'short' });
+                        
+                        div.innerHTML += `
+                        <div class="wa-chat-card fade-in">
+                            <div class="wa-avatar" style="background:#222; color:white; border:1px solid rgba(255,255,255,0.1);">${icon}</div>
+                            <div class="wa-chat-info" style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <div class="wa-chat-header"><h4 style="text-transform: capitalize;">${data.target}</h4></div>
+                                <div class="wa-chat-lastmsg"><span style="color:${dirColor}; font-weight:bold; margin-right:5px;">${dirIcon}</span> ${timeStr}</div>
+                            </div>
+                        </div>`;
+                    });
+                } else {
+                    div.innerHTML = `<div style="text-align:center; color:var(--muted); margin-top:20px;">No recent calls.</div>`;
+                }
+            });
         }
 
         window.uploadStatusFile = function(e) {
@@ -375,11 +446,8 @@
 
         let statusTimer;
         window.viewStatus = function(user, imgUrl) {
-            document.getElementById('status-viewer').style.display = 'flex';
-            document.getElementById('status-author').innerText = user;
-            document.getElementById('status-img').src = imgUrl;
-            let w = 0; let bar = document.getElementById('status-progress-bar'); bar.style.width = '0%';
-            clearInterval(statusTimer);
+            document.getElementById('status-viewer').style.display = 'flex'; document.getElementById('status-author').innerText = user; document.getElementById('status-img').src = imgUrl;
+            let w = 0; let bar = document.getElementById('status-progress-bar'); bar.style.width = '0%'; clearInterval(statusTimer);
             statusTimer = setInterval(() => { w += 2; bar.style.width = w + '%'; if(w >= 100) closeStatus(); }, 100);
         }
         window.closeStatus = function() { clearInterval(statusTimer); document.getElementById('status-viewer').style.display = 'none'; }
@@ -443,17 +511,8 @@
                 
                 let msgExtractText = data.text || ""; 
                 if(data.audioUrl) { contentHTML += `<audio controls style="max-width:200px; height:35px; outline:none;"><source src="${data.audioUrl}" type="audio/webm"></audio><br>`; msgExtractText = "🎵 Voice Note"; } 
-                
-                // 🌟 NEW: RENDER HD IMAGE & DOCS 🌟
-                if(data.imageUrl) { 
-                    // Use openPhotoViewer instead of window.open
-                    contentHTML += `<img src="${data.imageUrl}" class="chat-img" onclick="event.stopPropagation(); openPhotoViewer('${data.imageUrl}')"/><br>`; 
-                    msgExtractText = "📷 Image"; 
-                } 
-                if(data.docUrl) {
-                    contentHTML += `<a href="${data.docUrl}" download="${data.docName}" class="doc-link" onclick="event.stopPropagation();">📄 ${data.docName}</a><br>`;
-                    msgExtractText = "📄 Document";
-                }
+                if(data.imageUrl) { contentHTML += `<img src="${data.imageUrl}" class="chat-img" onclick="event.stopPropagation(); openPhotoViewer('${data.imageUrl}')"/><br>`; msgExtractText = "📷 Image"; } 
+                if(data.docUrl) { contentHTML += `<a href="${data.docUrl}" download="${data.docName}" class="doc-link" onclick="event.stopPropagation();"><div style="font-size:1.5rem;">📄</div> <div>${data.docName}</div></a>`; msgExtractText = "📄 Document"; }
                 
                 contentHTML += data.text || "";
                 let reactionHTML = data.reaction ? `<div class="reaction-badge">${data.reaction}</div>` : '';
@@ -465,16 +524,8 @@
             onChildRemoved(messagesRef, (snapshot) => { let msgDiv = document.getElementById("msg-" + snapshot.key); if(msgDiv) { msgDiv.innerHTML = `<span style="color:var(--muted); font-style:italic;">🚫 Deleted</span>`; setTimeout(() => msgDiv.remove(), 2000); } });
         }
 
-        // 🌟 NEW: IN-APP PHOTO VIEWER LOGIC 🌟
-        window.openPhotoViewer = function(url) {
-            document.getElementById('photo-viewer-img').src = url;
-            document.getElementById('photo-download-btn').href = url;
-            document.getElementById('photo-viewer-modal').style.display = 'flex';
-        }
-        window.closePhotoViewer = function() {
-            document.getElementById('photo-viewer-modal').style.display = 'none';
-            document.getElementById('photo-viewer-img').src = "";
-        }
+        window.openPhotoViewer = function(url) { document.getElementById('photo-viewer-img').src = url; document.getElementById('photo-download-btn').href = url; document.getElementById('photo-viewer-modal').style.display = 'flex'; }
+        window.closePhotoViewer = function() { document.getElementById('photo-viewer-modal').style.display = 'none'; document.getElementById('photo-viewer-img').src = ""; }
 
         window.openMsgOptions = function(key, sender, textExtract) { selectedMsgKey = key; selectedMsgSender = sender; selectedMsgTextForReply = textExtract; document.getElementById('msg-options-modal').style.display = 'flex'; }
         window.closeMsgOptions = function() { document.getElementById('msg-options-modal').style.display = 'none'; selectedMsgKey = null; }
@@ -489,74 +540,30 @@
         window.sendRealMsg = function() { let input = document.getElementById('msg-input'); if(input.value.trim() !== "") { let payload = { sender: currentUser, text: input.value, read: false, timestamp: Date.now() }; if(isReplying) { payload.reply = replyData; cancelReply(); } push(messagesRef, payload); input.value = ''; document.getElementById("mic-btn").style.display = "block"; document.getElementById("send-btn").style.display = "none"; if(chatType === 'private') set(ref(db, `chats/${privateRoomId}/typing/${currentUser}`), false); } }
         document.getElementById("msg-input").addEventListener("keypress", (e) => { if(e.key === "Enter") window.sendRealMsg(); });
 
-        // 🌟 NEW: ATTACHMENT MENU LOGIC 🌟
-        window.toggleAttachMenu = function() {
-            let menu = document.getElementById('attach-menu');
-            menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
-        }
-        
-        // Hide attach menu if clicked outside
-        document.addEventListener('click', function(e) {
-            if(e.target.id !== 'attach-btn' && e.target.id !== 'attach-menu' && !e.target.closest('#attach-menu')) {
-                document.getElementById('attach-menu').style.display = 'none';
-            }
-        });
+        window.toggleAttachMenu = function() { let menu = document.getElementById('attach-menu'); menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex'; }
+        document.addEventListener('click', function(e) { if(e.target.id !== 'attach-btn' && e.target.id !== 'attach-menu' && !e.target.closest('#attach-menu')) { document.getElementById('attach-menu').style.display = 'none'; } });
 
-        // 🌟 HD IMAGE UPLOAD LOGIC 🌟
-        document.getElementById('image-upload').addEventListener('change', function(event) { 
-            const file = event.target.files[0]; if(!file) return; 
-            showToast("Sending HD Photo..."); 
-            const reader = new FileReader(); 
-            reader.onload = function(e) { 
-                const img = new Image(); 
-                img.onload = function() { 
-                    const canvas = document.createElement('canvas'); 
-                    const MAX_W = 1024; const MAX_H = 1024; // Increased size for better quality
-                    let w = img.width; let h = img.height; 
-                    if (w > h) { if (w > MAX_W) { h *= MAX_W / w; w = MAX_W; } } else { if (h > MAX_H) { w *= MAX_H / h; h = MAX_H; } } 
-                    canvas.width = w; canvas.height = h; 
-                    canvas.getContext('2d').drawImage(img, 0, 0, w, h); 
-                    
-                    let payload = { sender: currentUser, text: "", imageUrl: canvas.toDataURL('image/jpeg', 0.75), read: false, timestamp: Date.now() }; // Increased Quality to 0.75
-                    if(isReplying) { payload.reply = replyData; cancelReply(); } 
-                    push(messagesRef, payload); 
-                }; 
-                img.src = e.target.result; 
-            }; 
-            reader.readAsDataURL(file); 
-            event.target.value = ''; 
-        });
+        document.getElementById('image-upload').addEventListener('change', function(event) { const file = event.target.files[0]; if(!file) return; showToast("Sending HD Photo..."); const reader = new FileReader(); reader.onload = function(e) { const img = new Image(); img.onload = function() { const canvas = document.createElement('canvas'); const MAX_W = 1024; const MAX_H = 1024; let w = img.width; let h = img.height; if (w > h) { if (w > MAX_W) { h *= MAX_W / w; w = MAX_W; } } else { if (h > MAX_H) { w *= MAX_H / h; h = MAX_H; } } canvas.width = w; canvas.height = h; canvas.getContext('2d').drawImage(img, 0, 0, w, h); let payload = { sender: currentUser, text: "", imageUrl: canvas.toDataURL('image/jpeg', 0.75), read: false, timestamp: Date.now() }; if(isReplying) { payload.reply = replyData; cancelReply(); } push(messagesRef, payload); }; img.src = e.target.result; }; reader.readAsDataURL(file); event.target.value = ''; });
+        document.getElementById('doc-upload').addEventListener('change', function(event) { const file = event.target.files[0]; if(!file) return; if(file.size > 2 * 1024 * 1024) { alert("File is too large! Please upload a PDF/Document under 2MB."); return; } showToast("Sending Document..."); const reader = new FileReader(); reader.onload = function(e) { let payload = { sender: currentUser, text: "", docUrl: e.target.result, docName: file.name, read: false, timestamp: Date.now() }; if(isReplying) { payload.reply = replyData; cancelReply(); } push(messagesRef, payload); }; reader.readAsDataURL(file); event.target.value = ''; });
 
-        // 🌟 DOCUMENT (PDF/TXT) UPLOAD LOGIC 🌟
-        document.getElementById('doc-upload').addEventListener('change', function(event) { 
-            const file = event.target.files[0]; if(!file) return; 
-            
-            // Check file size (Warn if > 2MB because Firebase Free might struggle with large base64)
-            if(file.size > 2 * 1024 * 1024) {
-                alert("File is too large! Please upload a PDF/Document under 2MB.");
-                return;
-            }
-            
-            showToast("Sending Document..."); 
-            const reader = new FileReader(); 
-            reader.onload = function(e) { 
-                let payload = { sender: currentUser, text: "", docUrl: e.target.result, docName: file.name, read: false, timestamp: Date.now() }; 
-                if(isReplying) { payload.reply = replyData; cancelReply(); } 
-                push(messagesRef, payload); 
-            }; 
-            reader.readAsDataURL(file); 
-            event.target.value = ''; 
-        });
-
-        window.startVideoCall = function() { if(chatType === 'group') return alert("Calls are for 1-on-1 private chats."); isAudioOnlyCall = false; startCall(); }
-        window.startAudioCall = function() { if(chatType === 'group') return alert("Calls are for 1-on-1 private chats."); isAudioOnlyCall = true; startCall(); }
+        window.startVideoCall = function() { if(chatType === 'group') return alert("Calls are for 1-on-1 private chats."); isAudioOnlyCall = false; logCall(targetUser, 'video', 'outgoing'); startCall(); }
+        window.startAudioCall = function() { if(chatType === 'group') return alert("Calls are for 1-on-1 private chats."); isAudioOnlyCall = true; logCall(targetUser, 'audio', 'outgoing'); startCall(); }
         async function setupMedia() { document.getElementById('video-overlay').style.display = 'flex'; if(isAudioOnlyCall) { document.getElementById('localVideo').style.display = 'none'; document.getElementById('remoteVideo').style.display = 'none'; document.getElementById('audio-avatar').style.display = 'flex'; document.getElementById('audio-avatar').innerText = targetUser.charAt(0).toUpperCase(); document.getElementById('cam-btn').style.display = 'none'; document.getElementById('flip-cam-btn').style.display = 'none'; } else { document.getElementById('localVideo').style.display = 'block'; document.getElementById('remoteVideo').style.display = 'block'; document.getElementById('audio-avatar').style.display = 'none'; document.getElementById('cam-btn').style.display = 'flex'; document.getElementById('flip-cam-btn').style.display = 'block'; } isMuted = false; isCamOff = false; document.getElementById('mute-btn').innerText = '🎙️'; document.getElementById('mute-btn').classList.remove('active-off'); document.getElementById('cam-btn').innerText = '📹'; document.getElementById('cam-btn').classList.remove('active-off'); localStream = await navigator.mediaDevices.getUserMedia({ video: isAudioOnlyCall ? false : { facingMode: 'user' }, audio: true }); if(!isAudioOnlyCall) document.getElementById('localVideo').srcObject = localStream; peerConnection = new RTCPeerConnection(servers); localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream)); peerConnection.ontrack = (event) => { if(!isAudioOnlyCall) document.getElementById('remoteVideo').srcObject = event.streams[0]; else { let audioPlayer = new Audio(); audioPlayer.srcObject = event.streams[0]; audioPlayer.play(); } }; }
         window.toggleMute = function() { if(!localStream) return; isMuted = !isMuted; localStream.getAudioTracks().forEach(track => track.enabled = !isMuted); let btn = document.getElementById('mute-btn'); btn.innerText = isMuted ? '🔇' : '🎙️'; isMuted ? btn.classList.add('active-off') : btn.classList.remove('active-off'); }
         window.toggleCam = function() { if(!localStream || isAudioOnlyCall) return; isCamOff = !isCamOff; localStream.getVideoTracks().forEach(track => track.enabled = !isCamOff); let btn = document.getElementById('cam-btn'); btn.innerText = isCamOff ? '📷❌' : '📹'; isCamOff ? btn.classList.add('active-off') : btn.classList.remove('active-off'); document.getElementById('localVideo').style.opacity = isCamOff ? '0.3' : '1'; }
         window.flipCamera = async function() { if (!localStream || isAudioOnlyCall) return; localStream.getVideoTracks().forEach(track => track.stop()); const newStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); const newVideoTrack = newStream.getVideoTracks()[0]; localStream.removeTrack(localStream.getVideoTracks()[0]); localStream.addTrack(newVideoTrack); document.getElementById('localVideo').srcObject = localStream; if (peerConnection) { const sender = peerConnection.getSenders().find(s => s.track.kind === 'video'); if (sender) sender.replaceTrack(newVideoTrack); } }
+        
         window.startCall = async function() { await setupMedia(); peerConnection.onicecandidate = event => { if(event.candidate) set(ref(db, `chats/${privateRoomId}/call/offerCandidate`), JSON.stringify(event.candidate)); }; const offer = await peerConnection.createOffer(); await peerConnection.setLocalDescription(offer); set(callRef, { offer: JSON.stringify({ type: offer.type, sdp: offer.sdp, caller: currentUser }), callType: isAudioOnlyCall ? 'audio' : 'video' }); onValue(ref(db, `chats/${privateRoomId}/call/answer`), (snapshot) => { const data = snapshot.val(); if(data && !peerConnection.currentRemoteDescription) peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(data))); }); onValue(ref(db, `chats/${privateRoomId}/call/answerCandidate`), (snapshot) => { const data = snapshot.val(); if(data) peerConnection.addIceCandidate(new RTCIceCandidate(JSON.parse(data))); }); }
-        function listenForCalls() { onValue(ref(db, `chats/${privateRoomId}/call`), (snapshot) => { const data = snapshot.val(); if(data && data.offer) { let offerObj = JSON.parse(data.offer); if(offerObj.caller !== currentUser) { isAudioOnlyCall = (data.callType === 'audio'); document.getElementById('incoming-alert').style.display = 'block'; let callTypeText = isAudioOnlyCall ? "📞 Audio Call" : "📹 Video Call"; document.getElementById('incoming-alert').innerText = `${callTypeText} from ${offerObj.caller.toUpperCase()}! Tap to answer.`; } } else { document.getElementById('incoming-alert').style.display = 'none'; endCallUI(); } }); }
-        window.answerCall = async function() { document.getElementById('incoming-alert').style.display = 'none'; await setupMedia(); peerConnection.onicecandidate = event => { if(event.candidate) set(ref(db, `chats/${privateRoomId}/call/answerCandidate`), JSON.stringify(event.candidate)); }; onValue(ref(db, `chats/${privateRoomId}/call/offer`), async (snapshot) => { const data = snapshot.val(); if(data) { await peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(data))); const answer = await peerConnection.createAnswer(); await peerConnection.setLocalDescription(answer); set(ref(db, `chats/${privateRoomId}/call/answer`), JSON.stringify({ type: answer.type, sdp: answer.sdp })); } }, { onlyOnce: true }); onValue(ref(db, `chats/${privateRoomId}/call/offerCandidate`), (snapshot) => { const data = snapshot.val(); if(data) peerConnection.addIceCandidate(new RTCIceCandidate(JSON.parse(data))); }); }
+        
+        let incomingCallerName = "";
+        function listenForCalls() { onValue(ref(db, `chats/${privateRoomId}/call`), (snapshot) => { const data = snapshot.val(); if(data && data.offer) { let offerObj = JSON.parse(data.offer); if(offerObj.caller !== currentUser) { incomingCallerName = offerObj.caller; isAudioOnlyCall = (data.callType === 'audio'); document.getElementById('incoming-alert').style.display = 'block'; let callTypeText = isAudioOnlyCall ? "📞 Audio Call" : "📹 Video Call"; document.getElementById('incoming-alert').innerText = `${callTypeText} from ${offerObj.caller.toUpperCase()}! Tap to answer.`; } } else { document.getElementById('incoming-alert').style.display = 'none'; endCallUI(); } }); }
+        
+        window.answerCall = async function() { 
+            document.getElementById('incoming-alert').style.display = 'none'; 
+            logCall(incomingCallerName, isAudioOnlyCall ? 'audio' : 'video', 'incoming');
+            await setupMedia(); peerConnection.onicecandidate = event => { if(event.candidate) set(ref(db, `chats/${privateRoomId}/call/answerCandidate`), JSON.stringify(event.candidate)); }; onValue(ref(db, `chats/${privateRoomId}/call/offer`), async (snapshot) => { const data = snapshot.val(); if(data) { await peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(data))); const answer = await peerConnection.createAnswer(); await peerConnection.setLocalDescription(answer); set(ref(db, `chats/${privateRoomId}/call/answer`), JSON.stringify({ type: answer.type, sdp: answer.sdp })); } }, { onlyOnce: true }); onValue(ref(db, `chats/${privateRoomId}/call/offerCandidate`), (snapshot) => { const data = snapshot.val(); if(data) peerConnection.addIceCandidate(new RTCIceCandidate(JSON.parse(data))); }); 
+        }
+        
         window.endCall = function() { remove(callRef); endCallUI(); }
         function endCallUI() { if(peerConnection) peerConnection.close(); if(localStream) localStream.getTracks().forEach(track => track.stop()); document.getElementById('video-overlay').style.display = 'none'; }
     </script>
