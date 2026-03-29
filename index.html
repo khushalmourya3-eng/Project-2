@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#00ffcc">
-    <title>SecureChat // V19.1 (No Veggies)</title>
+    <title>SecureChat // V20 (Docs & HD Photos)</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
@@ -19,7 +19,6 @@
             --text-main: #e9edef; --muted: #8696a0; --header-bg: rgba(15, 20, 25, 0.95);
         }
         
-        /* 🌟 ASLI BACKGROUND (Friends talking, chill aesthetic) 🌟 */
         body { background: linear-gradient(rgba(10,15,20,0.7), rgba(10,15,20,0.85)), url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat fixed; color: var(--text-main); height: 100dvh; overflow: hidden; display: flex; justify-content: center; }
         
         ::-webkit-scrollbar { width: 5px; height: 5px; } 
@@ -79,7 +78,14 @@
         .reply-preview-box .close-btn { position: absolute; right: 10px; top: 5px; cursor: pointer; color: #ff4757; font-weight: bold; font-size: 1.2rem; }
 
         .sender-name { font-size: 0.75rem; color: var(--primary); font-weight: bold; margin-bottom: 4px; display: block; text-transform: capitalize; }
-        .chat-img { max-width: 100%; border-radius: 8px; margin-bottom: 5px; }
+        
+        /* 🌟 NEW CHAT IMG STYLES 🌟 */
+        .chat-img { max-width: 100%; border-radius: 8px; margin-bottom: 5px; border: 1px solid rgba(255,255,255,0.1); cursor: zoom-in; }
+        
+        /* 🌟 NEW DOCUMENT LINK STYLES 🌟 */
+        .doc-link { display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px; color: var(--text-main); text-decoration: none; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 5px; word-break: break-all; }
+        .doc-link:hover { background: rgba(0,255,204,0.1); border-color: var(--primary); }
+
         .tick { position: absolute; bottom: 4px; right: 8px; font-size: 0.7rem;}
         .tick-blue { color: #3498db; } 
 
@@ -90,7 +96,13 @@
         .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
         @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
 
-        #input-area { display: flex; align-items: center; padding: 10px; background: var(--header-bg); gap: 10px; border-top: 1px solid rgba(255,255,255,0.05); }
+        /* 🌟 ATTACHMENT MENU 🌟 */
+        #attach-menu { display: none; position: absolute; bottom: 65px; left: 10px; background: var(--header-bg); padding: 15px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1); flex-direction: column; gap: 15px; z-index: 50; }
+        .attach-opt { display: flex; align-items: center; gap: 15px; color: white; font-weight: bold; cursor: pointer; padding: 5px; transition: 0.2s; }
+        .attach-opt:hover { color: var(--primary); }
+        .attach-icon { background: rgba(255,255,255,0.1); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; }
+
+        #input-area { display: flex; align-items: center; padding: 10px; background: var(--header-bg); gap: 10px; border-top: 1px solid rgba(255,255,255,0.05); position: relative; }
         #attach-btn, #mic-btn { background: none; color: var(--primary); border: none; font-size: 1.5rem; cursor: pointer; padding: 5px; }
         #mic-btn.recording { color: #ff4757; animation: pulse 1s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
@@ -112,6 +124,11 @@
         .crop-container { width: 90%; max-width: 400px; height: 350px; background: #111; border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
         .crop-container img { display: block; max-width: 100%; }
         
+        /* 🌟 NEW: IN-APP PHOTO VIEWER 🌟 */
+        #photo-viewer-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; flex-direction: column; }
+        #photo-viewer-img { max-width: 95%; max-height: 85%; object-fit: contain; border-radius: 8px; }
+        .close-photo-viewer { position: absolute; top: 20px; right: 20px; color: white; font-size: 2.5rem; cursor: pointer; text-shadow: 0 2px 5px black; }
+
         #video-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 100; flex-direction: column; justify-content: center; align-items: center;}
         #remoteVideo { width: 100%; height: 100%; object-fit: cover; background: #111; position: absolute; top:0; left:0; }
         #localVideo { width: 110px; height: 150px; position: absolute; bottom: 120px; right: 20px; object-fit: cover; border-radius: 12px; background: #222; border: 2px solid var(--primary); z-index: 101; }
@@ -125,6 +142,12 @@
 </head>
 <body>
 
+    <div id="photo-viewer-modal">
+        <span class="close-photo-viewer" onclick="closePhotoViewer()">×</span>
+        <img id="photo-viewer-img" src="">
+        <a id="photo-download-btn" href="" download="SecureChat_Image.jpg" style="margin-top: 20px; padding: 10px 20px; background: var(--primary); color: black; text-decoration: none; border-radius: 8px; font-weight: bold;">⬇️ Download</a>
+    </div>
+
     <div id="status-viewer">
         <div id="status-progress-bar"></div>
         <div class="status-viewer-header">
@@ -136,12 +159,7 @@
 
     <div id="msg-options-modal">
         <div class="emoji-bar">
-            <span onclick="sendReaction('👍')">👍</span>
-            <span onclick="sendReaction('❤️')">❤️</span>
-            <span onclick="sendReaction('😂')">😂</span>
-            <span onclick="sendReaction('😮')">😮</span>
-            <span onclick="sendReaction('😢')">😢</span>
-            <span onclick="sendReaction('🙏')">🙏</span>
+            <span onclick="sendReaction('👍')">👍</span><span onclick="sendReaction('❤️')">❤️</span><span onclick="sendReaction('😂')">😂</span><span onclick="sendReaction('😮')">😮</span><span onclick="sendReaction('😢')">😢</span><span onclick="sendReaction('🙏')">🙏</span>
         </div>
         <div class="action-opt" onclick="initiateReply()">↩️ Reply to Message</div>
         <div class="action-opt delete-opt" onclick="deleteSelectedMsg()">🗑️ Delete for everyone</div>
@@ -253,8 +271,19 @@
         </div>
 
         <div id="input-area">
+            <div id="attach-menu">
+                <div class="attach-opt" onclick="document.getElementById('image-upload').click(); toggleAttachMenu();">
+                    <div class="attach-icon" style="color: #3498db;">📷</div> Send Photo
+                </div>
+                <div class="attach-opt" onclick="document.getElementById('doc-upload').click(); toggleAttachMenu();">
+                    <div class="attach-icon" style="color: #9b59b6;">📄</div> Send Document (PDF/Doc)
+                </div>
+            </div>
+
             <input type="file" id="image-upload" accept="image/*" style="display: none;">
-            <button id="attach-btn" onclick="document.getElementById('image-upload').click()">📎</button>
+            <input type="file" id="doc-upload" accept=".pdf,.doc,.docx,.txt" style="display: none;">
+            
+            <button id="attach-btn" onclick="toggleAttachMenu()">📎</button>
             <input type="text" id="msg-input" placeholder="Message...">
             <button id="mic-btn" onclick="toggleRecording()">🎙️</button>
             <button id="send-btn" onclick="sendRealMsg()" style="display:none;">➤</button>
@@ -411,7 +440,22 @@
                 let timeStr = formatTime(data.timestamp || Date.now()); let tickElement = (chatType === 'private' && msgType === "sent") ? (data.read ? `<span class="tick tick-blue">✓✓</span>` : `<span class="tick tick-grey">✓</span>`) : '';
                 let contentHTML = ""; if(chatType === 'group' && msgType === 'received') { contentHTML += `<span class="sender-name">${data.sender}</span>`; }
                 if(data.reply) { contentHTML += `<div class="quoted-msg"><span class="quoted-sender">${data.reply.sender}</span>${data.reply.text}</div>`; }
-                let msgExtractText = data.text || ""; if(data.audioUrl) { contentHTML += `<audio controls style="max-width:200px; height:35px; outline:none;"><source src="${data.audioUrl}" type="audio/webm"></audio><br>`; msgExtractText = "🎵 Voice Note"; } if(data.imageUrl) { contentHTML += `<img src="${data.imageUrl}" class="chat-img" onclick="window.open('${data.imageUrl}')"/><br>`; msgExtractText = "📷 Image"; } contentHTML += data.text || "";
+                
+                let msgExtractText = data.text || ""; 
+                if(data.audioUrl) { contentHTML += `<audio controls style="max-width:200px; height:35px; outline:none;"><source src="${data.audioUrl}" type="audio/webm"></audio><br>`; msgExtractText = "🎵 Voice Note"; } 
+                
+                // 🌟 NEW: RENDER HD IMAGE & DOCS 🌟
+                if(data.imageUrl) { 
+                    // Use openPhotoViewer instead of window.open
+                    contentHTML += `<img src="${data.imageUrl}" class="chat-img" onclick="event.stopPropagation(); openPhotoViewer('${data.imageUrl}')"/><br>`; 
+                    msgExtractText = "📷 Image"; 
+                } 
+                if(data.docUrl) {
+                    contentHTML += `<a href="${data.docUrl}" download="${data.docName}" class="doc-link" onclick="event.stopPropagation();">📄 ${data.docName}</a><br>`;
+                    msgExtractText = "📄 Document";
+                }
+                
+                contentHTML += data.text || "";
                 let reactionHTML = data.reaction ? `<div class="reaction-badge">${data.reaction}</div>` : '';
                 let newMsg = document.createElement('div'); newMsg.id = "msg-" + msgKey; newMsg.className = `msg ${msgType}`; newMsg.innerHTML = `${contentHTML} <span class="tick" style="right: ${msgType==='sent' ? '25px':'8px'}">${timeStr}</span> ${tickElement} ${reactionHTML}`;
                 newMsg.onclick = () => openMsgOptions(msgKey, data.sender, msgExtractText); msgBox.appendChild(newMsg); msgBox.scrollTop = msgBox.scrollHeight;
@@ -419,6 +463,17 @@
 
             onChildChanged(messagesRef, (snapshot) => { let msgDiv = document.getElementById("msg-" + snapshot.key); if(msgDiv) { const data = snapshot.val(); if(chatType === 'private' && data.read && data.sender === currentUser) { let tick = msgDiv.querySelector('.tick-grey'); if(tick) { tick.className = "tick tick-blue"; tick.innerText = "✓✓"; } } let existingBadge = msgDiv.querySelector('.reaction-badge'); if(data.reaction) { if(existingBadge) { existingBadge.innerText = data.reaction; } else { msgDiv.innerHTML += `<div class="reaction-badge">${data.reaction}</div>`; } } else if(existingBadge) { existingBadge.remove(); } } });
             onChildRemoved(messagesRef, (snapshot) => { let msgDiv = document.getElementById("msg-" + snapshot.key); if(msgDiv) { msgDiv.innerHTML = `<span style="color:var(--muted); font-style:italic;">🚫 Deleted</span>`; setTimeout(() => msgDiv.remove(), 2000); } });
+        }
+
+        // 🌟 NEW: IN-APP PHOTO VIEWER LOGIC 🌟
+        window.openPhotoViewer = function(url) {
+            document.getElementById('photo-viewer-img').src = url;
+            document.getElementById('photo-download-btn').href = url;
+            document.getElementById('photo-viewer-modal').style.display = 'flex';
+        }
+        window.closePhotoViewer = function() {
+            document.getElementById('photo-viewer-modal').style.display = 'none';
+            document.getElementById('photo-viewer-img').src = "";
         }
 
         window.openMsgOptions = function(key, sender, textExtract) { selectedMsgKey = key; selectedMsgSender = sender; selectedMsgTextForReply = textExtract; document.getElementById('msg-options-modal').style.display = 'flex'; }
@@ -434,7 +489,64 @@
         window.sendRealMsg = function() { let input = document.getElementById('msg-input'); if(input.value.trim() !== "") { let payload = { sender: currentUser, text: input.value, read: false, timestamp: Date.now() }; if(isReplying) { payload.reply = replyData; cancelReply(); } push(messagesRef, payload); input.value = ''; document.getElementById("mic-btn").style.display = "block"; document.getElementById("send-btn").style.display = "none"; if(chatType === 'private') set(ref(db, `chats/${privateRoomId}/typing/${currentUser}`), false); } }
         document.getElementById("msg-input").addEventListener("keypress", (e) => { if(e.key === "Enter") window.sendRealMsg(); });
 
-        document.getElementById('image-upload').addEventListener('change', function(event) { const file = event.target.files[0]; if(!file) return; showToast("Sending..."); const reader = new FileReader(); reader.onload = function(e) { const img = new Image(); img.onload = function() { const canvas = document.createElement('canvas'); const MAX_W = 500; const MAX_H = 500; let w = img.width; let h = img.height; if (w > h) { if (w > MAX_W) { h *= MAX_W / w; w = MAX_W; } } else { if (h > MAX_H) { w *= MAX_H / h; h = MAX_H; } } canvas.width = w; canvas.height = h; canvas.getContext('2d').drawImage(img, 0, 0, w, h); let payload = { sender: currentUser, text: "", imageUrl: canvas.toDataURL('image/jpeg', 0.5), read: false, timestamp: Date.now() }; if(isReplying) { payload.reply = replyData; cancelReply(); } push(messagesRef, payload); }; img.src = e.target.result; }; reader.readAsDataURL(file); event.target.value = ''; });
+        // 🌟 NEW: ATTACHMENT MENU LOGIC 🌟
+        window.toggleAttachMenu = function() {
+            let menu = document.getElementById('attach-menu');
+            menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
+        }
+        
+        // Hide attach menu if clicked outside
+        document.addEventListener('click', function(e) {
+            if(e.target.id !== 'attach-btn' && e.target.id !== 'attach-menu' && !e.target.closest('#attach-menu')) {
+                document.getElementById('attach-menu').style.display = 'none';
+            }
+        });
+
+        // 🌟 HD IMAGE UPLOAD LOGIC 🌟
+        document.getElementById('image-upload').addEventListener('change', function(event) { 
+            const file = event.target.files[0]; if(!file) return; 
+            showToast("Sending HD Photo..."); 
+            const reader = new FileReader(); 
+            reader.onload = function(e) { 
+                const img = new Image(); 
+                img.onload = function() { 
+                    const canvas = document.createElement('canvas'); 
+                    const MAX_W = 1024; const MAX_H = 1024; // Increased size for better quality
+                    let w = img.width; let h = img.height; 
+                    if (w > h) { if (w > MAX_W) { h *= MAX_W / w; w = MAX_W; } } else { if (h > MAX_H) { w *= MAX_H / h; h = MAX_H; } } 
+                    canvas.width = w; canvas.height = h; 
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h); 
+                    
+                    let payload = { sender: currentUser, text: "", imageUrl: canvas.toDataURL('image/jpeg', 0.75), read: false, timestamp: Date.now() }; // Increased Quality to 0.75
+                    if(isReplying) { payload.reply = replyData; cancelReply(); } 
+                    push(messagesRef, payload); 
+                }; 
+                img.src = e.target.result; 
+            }; 
+            reader.readAsDataURL(file); 
+            event.target.value = ''; 
+        });
+
+        // 🌟 DOCUMENT (PDF/TXT) UPLOAD LOGIC 🌟
+        document.getElementById('doc-upload').addEventListener('change', function(event) { 
+            const file = event.target.files[0]; if(!file) return; 
+            
+            // Check file size (Warn if > 2MB because Firebase Free might struggle with large base64)
+            if(file.size > 2 * 1024 * 1024) {
+                alert("File is too large! Please upload a PDF/Document under 2MB.");
+                return;
+            }
+            
+            showToast("Sending Document..."); 
+            const reader = new FileReader(); 
+            reader.onload = function(e) { 
+                let payload = { sender: currentUser, text: "", docUrl: e.target.result, docName: file.name, read: false, timestamp: Date.now() }; 
+                if(isReplying) { payload.reply = replyData; cancelReply(); } 
+                push(messagesRef, payload); 
+            }; 
+            reader.readAsDataURL(file); 
+            event.target.value = ''; 
+        });
 
         window.startVideoCall = function() { if(chatType === 'group') return alert("Calls are for 1-on-1 private chats."); isAudioOnlyCall = false; startCall(); }
         window.startAudioCall = function() { if(chatType === 'group') return alert("Calls are for 1-on-1 private chats."); isAudioOnlyCall = true; startCall(); }
